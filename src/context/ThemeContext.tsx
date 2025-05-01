@@ -14,8 +14,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     if (savedTheme) {
       return savedTheme === 'dark';
     }
-    // Check system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Default to dark mode instead of checking system preference
+    return true;
   });
 
   useEffect(() => {
@@ -28,6 +28,14 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Set dark mode by default on first load
+  useEffect(() => {
+    if (!localStorage.getItem('theme')) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
