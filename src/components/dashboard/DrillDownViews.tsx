@@ -1,6 +1,6 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart, ReferenceLine, Legend } from 'recharts';
-import { drillDownData } from '../../data/mockData';
-import { Phone, PhoneOutgoing, Clock, Target, PhoneCall, CheckCircle, Heart, UserCircle, Timer, Play, AlertTriangle, MessageSquare } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { drillDownData, customerMoodData, omnichannelTrendsData } from '../../data/mockData';
+import { Phone, PhoneOutgoing, Clock, Target, PhoneCall, CheckCircle, AlertTriangle, MessageSquare, Users } from 'lucide-react';
 
 const COLORS = {
   primary: '#0ea5e9',
@@ -77,35 +77,6 @@ const MetricCard = ({ title, value, icon: Icon, trend, className = '' }: MetricC
   </div>
 );
 
-interface AgentCardProps {
-  name: string;
-  calls: number;
-  aht: string;
-}
-
-const AgentCard = ({ name, calls, aht }: AgentCardProps) => (
-  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-    <div className="flex flex-col">
-      <div className="flex items-center space-x-3 mb-4">
-        <UserCircle className="h-10 w-10 text-gray-400 dark:text-gray-500" />
-        <h4 className="text-lg font-medium text-gray-900 dark:text-white">{name}</h4>
-      </div>
-      <div className="flex items-center justify-center space-x-4">
-        <div className="flex items-center px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300">
-          <PhoneCall className="h-3.5 w-3.5 mr-1 text-blue-500 dark:text-blue-400" />
-          <span className="text-sm font-medium">{calls}</span>
-          <span className="text-sm ml-1 opacity-80">calls</span>
-        </div>
-        <div className="flex items-center px-3 py-2 rounded-xl bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300">
-          <Timer className="h-3.5 w-3.5 mr-1 text-green-500 dark:text-green-400" />
-          <span className="text-sm font-medium">AHT:</span>
-          <span className="text-sm ml-1 opacity-80">{aht}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
 interface ChartContainerProps {
   title: string;
   children: React.ReactNode;
@@ -122,6 +93,46 @@ const ChartContainer = ({ title, children }: ChartContainerProps) => (
   </div>
 );
 
+// Department breakdown mock data
+// const DEPARTMENTS = [
+//   'Support',
+//   'Sales',
+//   'Billing',
+//   'Technical',
+//   'Onboard',
+// ];
+
+const departmentMetrics = {
+  totalCalls: [
+    { department: 'Support', value: 320 },
+    { department: 'Sales', value: 280 },
+    { department: 'Billing', value: 210 },
+    { department: 'Technical', value: 260 },
+    { department: 'Onboard', value: 178 },
+  ],
+  totalAnswered: [
+    { department: 'Support', value: 240 },
+    { department: 'Sales', value: 210 },
+    { department: 'Billing', value: 180 },
+    { department: 'Technical', value: 200 },
+    { department: 'Onboard', value: 106 },
+  ],
+  abandoned: [
+    { department: 'Support', value: 18 },
+    { department: 'Sales', value: 22 },
+    { department: 'Billing', value: 14 },
+    { department: 'Technical', value: 17 },
+    { department: 'Onboard', value: 10 },
+  ],
+  waitTime: [
+    { department: 'Support', value: 32 },
+    { department: 'Sales', value: 41 },
+    { department: 'Billing', value: 36 },
+    { department: 'Technical', value: 39 },
+    { department: 'Onboard', value: 37 },
+  ],
+};
+
 export const TotalCallsDrillDown = () => {
   const { totalCalls } = drillDownData;
 
@@ -129,7 +140,7 @@ export const TotalCallsDrillDown = () => {
     <div className="space-y-6">
       <div className="space-y-6 p-4">
         {/* Top Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
             title="Total Calls"
             value={totalCalls.callTypes.inbound + totalCalls.callTypes.outbound}
@@ -151,13 +162,33 @@ export const TotalCallsDrillDown = () => {
             trend={-2.1}
             className="bg-gradient-to-br from-orange-500 to-orange-600"
           />
-          <MetricCard
-            title="Service Level"
-            value={`${totalCalls.performance.serviceLevelActual}%`}
-            icon={Target}
-            trend={1.5}
-            className="bg-gradient-to-br from-purple-500 to-purple-600"
-          />
+        </div>
+        {/* Department Breakdown */}
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Department Breakdown</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-[400px] w-full text-xs text-left">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-800">
+                  <th className="px-3 py-2 font-medium">Department</th>
+                  <th className="px-3 py-2 font-medium">Total Calls</th>
+                </tr>
+              </thead>
+              <tbody>
+                {departmentMetrics.totalCalls.map((row) => (
+                  <tr key={row.department}
+                    className="border-b border-gray-100 dark:border-gray-800 transition bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                  >
+                    <td className="px-3 py-2 flex items-center gap-2 font-medium">
+                      <Users className="h-4 w-4 text-blue-400" />
+                      {row.department}
+                    </td>
+                    <td className="px-3 py-2">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Charts Section */}
@@ -190,72 +221,7 @@ export const TotalCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Department Distribution">
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={totalCalls.byDepartment}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={80}
-                    outerRadius={120}
-                    paddingAngle={2}
-                    label={({ name, percentage }) => `${name} (${percentage}%)`}
-                  >
-                    {totalCalls.byDepartment.map((_entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`}
-                        fill={Object.values(COLORS.gradients)[index % Object.values(COLORS.gradients).length][0]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartContainer>
-
-          <ChartContainer title="Weekly Call Volume Trend">
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={totalCalls.trends.weekly}>
-                  <defs>
-                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.1}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
-                  <XAxis 
-                    dataKey="week" 
-                    stroke="currentColor"
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    stroke="currentColor"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => value.toLocaleString()}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke={COLORS.primary}
-                    fillOpacity={1}
-                    fill="url(#colorValue)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartContainer>
-
-          <ChartContainer title="Daily Call Distribution">
+          <ChartContainer title="Call Volume by Time of Day">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={totalCalls.byTimeOfDay}>
@@ -274,66 +240,74 @@ export const TotalCallsDrillDown = () => {
                     tickFormatter={(value) => value.toLocaleString()}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar 
-                    dataKey="value" 
-                    radius={[4, 4, 0, 0]}
-                  >
-                    {totalCalls.byTimeOfDay.map((_entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`}
-                        fill={COLORS.primary}
-                        fillOpacity={0.8}
-                      />
-                    ))}
-                  </Bar>
+                  <Bar dataKey="value" fill={COLORS.primary} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </ChartContainer>
-        </div>
 
-        <ChartContainer title="Performance Metrics">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-lg p-4">
-              <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-blue-500" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Average Handle Time
-                </span>
-              </div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                {totalCalls.performance.avgHandleTime}
-              </p>
+          <ChartContainer title="Daily Call Volume Trend">
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={totalCalls.trends.daily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
+                  <XAxis 
+                    dataKey="day" 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => value.toLocaleString()}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={COLORS.primary}
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.primary, stroke: COLORS.primary, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-lg p-4">
-              <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-green-500" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Average Hold Time
-                </span>
-              </div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                {totalCalls.performance.avgHoldTime}
-              </p>
+          </ChartContainer>
+
+          <ChartContainer title="Weekly Call Volume Trend">
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={totalCalls.trends.weekly}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
+                  <XAxis 
+                    dataKey="week" 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => value.toLocaleString()}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={COLORS.primary}
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.primary, stroke: COLORS.primary, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-lg p-4">
-              <div className="flex items-center space-x-3">
-                <Target className="h-5 w-5 text-purple-500" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Service Level
-                </span>
-              </div>
-              <div className="flex items-end space-x-2 mt-2">
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {totalCalls.performance.serviceLevelActual}%
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                  / {totalCalls.performance.serviceLevelTarget}% target
-                </p>
-              </div>
-            </div>
-          </div>
-        </ChartContainer>
+          </ChartContainer>
+        </div>
       </div>
     </div>
   );
@@ -341,104 +315,65 @@ export const TotalCallsDrillDown = () => {
 
 export const TotalAnsweredDrillDown = () => {
   const { totalAnswered } = drillDownData;
-  const topAgents = [
-    { name: 'Alex Johnson', calls: 85, aht: '245s', avatarSeed: 'Alex' },
-    { name: 'Jamie Smith', calls: 72, aht: '310s', avatarSeed: 'Jamie' },
-    { name: 'Taylor Wilson', calls: 68, aht: '280s', avatarSeed: 'Taylor' },
-    { name: 'Morgan Lee', calls: 65, aht: '325s', avatarSeed: 'Morgan' },
-  ];
-
-  // Prepare data for the team performance chart
-  const teamPerformanceData = totalAnswered.byQueue.map(queue => ({
-    name: queue.name,
-    'Answered Calls': queue.value,
-    'Avg Handle Time (s)': queue.avgTimeToAnswer,
-  }));
 
   return (
     <div className="space-y-6">
       <div className="space-y-6 p-4">
         {/* Top Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
             title="Total Answered"
-            value={totalAnswered.byChannel.reduce((sum, item) => sum + item.value, 0)}
+            value={totalAnswered.total}
             icon={PhoneCall}
             trend={3.8}
             className="bg-gradient-to-br from-green-500 to-green-600"
           />
           <MetricCard
-            title="First Call Resolution"
-            value={`${((totalAnswered.firstCallResolution.resolved / (totalAnswered.firstCallResolution.resolved + totalAnswered.firstCallResolution.escalated)) * 100).toFixed(1)}%`}
+            title="Answer Rate"
+            value={`${totalAnswered.percentage}%`}
             icon={CheckCircle}
-            trend={2.5}
+            trend={2.1}
             className="bg-gradient-to-br from-blue-500 to-blue-600"
           />
           <MetricCard
-            title="Avg Handle Time"
-            value="4m 35s"
+            title="Avg Duration"
+            value={totalAnswered.avgDuration}
             icon={Clock}
-            trend={-1.2}
+            trend={-1.5}
             className="bg-gradient-to-br from-purple-500 to-purple-600"
           />
-          <MetricCard
-            title="Customer Satisfaction"
-            value="92%"
-            icon={Heart}
-            trend={1.5}
-            className="bg-gradient-to-br from-pink-500 to-pink-600"
-          />
         </div>
-
-        <ChartContainer title="Top Performing Agents">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topAgents.map((agent) => (
-              <AgentCard key={agent.name} {...agent} />
-            ))}
+        {/* Department Breakdown */}
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Department Breakdown</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-[400px] w-full text-xs text-left">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-800">
+                  <th className="px-3 py-2 font-medium">Department</th>
+                  <th className="px-3 py-2 font-medium">Total Answered</th>
+                </tr>
+              </thead>
+              <tbody>
+                {departmentMetrics.totalAnswered.map((row) => (
+                  <tr key={row.department}
+                    className="border-b border-gray-100 dark:border-gray-800 transition bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                  >
+                    <td className="px-3 py-2 flex items-center gap-2 font-medium">
+                      <Users className="h-4 w-4 text-blue-400" />
+                      {row.department}
+                    </td>
+                    <td className="px-3 py-2">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </ChartContainer>
+        </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Team Performance */}
-          <ChartContainer title="Team Performance">
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={teamPerformanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="currentColor"
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    yAxisId="left"
-                    orientation="left"
-                    stroke="currentColor"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => value.toLocaleString()}
-                  />
-                  <YAxis 
-                    yAxisId="right"
-                    orientation="right"
-                    stroke="currentColor"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar yAxisId="left" dataKey="Answered Calls" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
-                  <Bar yAxisId="right" dataKey="Avg Handle Time (s)" fill={COLORS.success} radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartContainer>
-
-          {/* Channel Distribution */}
-          <ChartContainer title="Channel Distribution">
+          <ChartContainer title="Answered Calls by Channel">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -466,59 +401,35 @@ export const TotalAnsweredDrillDown = () => {
             </div>
           </ChartContainer>
 
-          {/* FCR Breakdown */}
-          <ChartContainer title="First Call Resolution">
+          <ChartContainer title="Answered Calls by Time of Day">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { 
-                        name: 'Resolved', 
-                        value: totalAnswered.firstCallResolution.resolved,
-                        percentage: ((totalAnswered.firstCallResolution.resolved / (totalAnswered.firstCallResolution.resolved + totalAnswered.firstCallResolution.escalated)) * 100).toFixed(1)
-                      },
-                      { 
-                        name: 'Escalated', 
-                        value: totalAnswered.firstCallResolution.escalated,
-                        percentage: ((totalAnswered.firstCallResolution.escalated / (totalAnswered.firstCallResolution.resolved + totalAnswered.firstCallResolution.escalated)) * 100).toFixed(1)
-                      }
-                    ]}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={80}
-                    outerRadius={120}
-                    paddingAngle={2}
-                    label={({ name, percentage }) => `${name} (${percentage}%)`}
-                  >
-                    <Cell fill={COLORS.success} />
-                    <Cell fill={COLORS.warning} />
-                  </Pie>
+                <BarChart data={totalAnswered.byTimeOfDay}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
+                  <XAxis 
+                    dataKey="hour" 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => value.toLocaleString()}
+                  />
                   <Tooltip content={<CustomTooltip />} />
-                </PieChart>
+                  <Bar dataKey="value" fill={COLORS.primary} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </ChartContainer>
 
-          {/* Daily Trend */}
-          <ChartContainer title="Daily Answer Rate Trend">
+          <ChartContainer title="Daily Answered Calls Trend">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={[
-                  { day: 'Mon', value: 92 },
-                  { day: 'Tue', value: 88 },
-                  { day: 'Wed', value: 95 },
-                  { day: 'Thu', value: 91 },
-                  { day: 'Fri', value: 87 }
-                ]}>
-                  <defs>
-                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.success} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={COLORS.success} stopOpacity={0.1}/>
-                    </linearGradient>
-                  </defs>
+                <LineChart data={totalAnswered.trends.daily}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
                   <XAxis 
                     dataKey="day" 
@@ -531,18 +442,17 @@ export const TotalAnsweredDrillDown = () => {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    domain={[80, 100]}
-                    tickFormatter={(value) => `${value}%`}
+                    tickFormatter={(value) => value.toLocaleString()}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area
+                  <Line
                     type="monotone"
                     dataKey="value"
-                    stroke={COLORS.success}
-                    fillOpacity={1}
-                    fill="url(#colorValue)"
+                    stroke={COLORS.primary}
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.primary, stroke: COLORS.primary, r: 4 }}
                   />
-                </AreaChart>
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </ChartContainer>
@@ -554,45 +464,65 @@ export const TotalAnsweredDrillDown = () => {
 
 export const AbandonedCallsDrillDown = () => {
   const { abandoned } = drillDownData;
-  
+
   return (
     <div className="space-y-6">
       <div className="space-y-6 p-4">
         {/* Top Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
             title="Total Abandoned"
-            value={abandoned.byQueue.reduce((sum, item) => sum + item.value, 0)}
-            icon={PhoneCall}
-            trend={2.1}
+            value={abandoned.total}
+            icon={Phone}
+            trend={-2.4}
             className="bg-gradient-to-br from-red-500 to-red-600"
           />
           <MetricCard
-            title="Avg Wait Time"
-            value="3m 45s"
-            icon={Clock}
-            trend={-1.5}
+            title="Abandonment Rate"
+            value={`${abandoned.percentage}%`}
+            icon={Target}
+            trend={-1.2}
             className="bg-gradient-to-br from-orange-500 to-orange-600"
           />
           <MetricCard
-            title="Peak Hour"
-            value="4:00 PM"
-            icon={Target}
-            trend={0}
-            className="bg-gradient-to-br from-purple-500 to-purple-600"
-          />
-          <MetricCard
-            title="Abandonment Rate"
-            value="12%"
-            icon={PhoneCall}
-            trend={-0.8}
+            title="Avg Wait Time"
+            value={abandoned.avgWaitTime}
+            icon={Clock}
+            trend={0.8}
             className="bg-gradient-to-br from-blue-500 to-blue-600"
           />
+        </div>
+        {/* Department Breakdown */}
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Department Breakdown</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-[400px] w-full text-xs text-left">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-800">
+                  <th className="px-3 py-2 font-medium">Department</th>
+                  <th className="px-3 py-2 font-medium">Total Abandoned</th>
+                </tr>
+              </thead>
+              <tbody>
+                {departmentMetrics.abandoned.map((row) => (
+                  <tr key={row.department}
+                    className="border-b border-gray-100 dark:border-gray-800 transition bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                  >
+                    <td className="px-3 py-2 flex items-center gap-2 font-medium">
+                      <Users className="h-4 w-4 text-blue-400" />
+                      {row.department}
+                    </td>
+                    <td className="px-3 py-2">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartContainer title="Abandonment by Wait Time">
+          <ChartContainer title="Abandoned Calls by Wait Time">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -605,7 +535,7 @@ export const AbandonedCallsDrillDown = () => {
                     innerRadius={80}
                     outerRadius={120}
                     paddingAngle={2}
-                    label={({ range, percentage }) => `${range} (${percentage}%)`}
+                    label={({ name, percentage }) => `${name} (${percentage}%)`}
                   >
                     {abandoned.byWaitTime.map((_entry, index) => (
                       <Cell 
@@ -620,65 +550,38 @@ export const AbandonedCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Abandonment by Queue">
+          <ChartContainer title="Abandoned Calls by Stage">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={abandoned.byQueue}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="currentColor"
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    stroke="currentColor"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => value.toLocaleString()}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar 
-                    dataKey="value" 
-                    fill={COLORS.danger}
-                    radius={[4, 4, 0, 0]}
+                <PieChart>
+                  <Pie
+                    data={abandoned.byStage}
+                    dataKey="value"
+                    nameKey="stage"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={120}
+                    paddingAngle={2}
+                    label={({ name, percentage }) => `${name} (${percentage}%)`}
                   >
-                    {abandoned.byQueue.map((_entry, index) => (
+                    {abandoned.byStage.map((_entry, index) => (
                       <Cell 
                         key={`cell-${index}`}
-                        fill={COLORS.danger}
-                        fillOpacity={0.8}
+                        fill={Object.values(COLORS.gradients)[index % Object.values(COLORS.gradients).length][0]}
                       />
                     ))}
-                  </Bar>
-                </BarChart>
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
               </ResponsiveContainer>
             </div>
           </ChartContainer>
 
-          {/* Hourly Abandonment Trend */}
-          <ChartContainer title="Hourly Abandonment Trend">
+          <ChartContainer title="Abandoned Calls by Time of Day">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={[
-                  { hour: '8 AM', value: 5 },
-                  { hour: '9 AM', value: 8 },
-                  { hour: '10 AM', value: 12 },
-                  { hour: '11 AM', value: 15 },
-                  { hour: '12 PM', value: 10 },
-                  { hour: '1 PM', value: 8 },
-                  { hour: '2 PM', value: 11 },
-                  { hour: '3 PM', value: 14 },
-                  { hour: '4 PM', value: 18 },
-                  { hour: '5 PM', value: 13 }
-                ]}>
-                  <defs>
-                    <linearGradient id="colorAbandoned" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.danger} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={COLORS.danger} stopOpacity={0.1}/>
-                    </linearGradient>
-                  </defs>
+                <BarChart data={abandoned.byTimeOfDay}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
                   <XAxis 
                     dataKey="hour" 
@@ -691,51 +594,43 @@ export const AbandonedCallsDrillDown = () => {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
+                    tickFormatter={(value) => value.toLocaleString()}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke={COLORS.danger}
-                    fillOpacity={1}
-                    fill="url(#colorAbandoned)"
-                  />
-                </AreaChart>
+                  <Bar dataKey="value" fill={COLORS.primary} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </ChartContainer>
 
-          {/* Queue Performance Metrics */}
-          <ChartContainer title="Queue Performance">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 rounded-lg p-4">
-                <div className="flex items-center space-x-3">
-                  <PhoneCall className="h-5 w-5 text-red-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Highest Abandonment
-                  </span>
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                  Technical Support
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  28% of total abandoned
-                </p>
-              </div>
-              <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 rounded-lg p-4">
-                <div className="flex items-center space-x-3">
-                  <Clock className="h-5 w-5 text-orange-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Peak Time
-                  </span>
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                  4:00 - 5:00 PM
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  25 abandonments
-                </p>
-              </div>
+          <ChartContainer title="Daily Abandoned Calls Trend">
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={abandoned.trends.daily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
+                  <XAxis 
+                    dataKey="day" 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => value.toLocaleString()}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={COLORS.primary}
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.primary, stroke: COLORS.primary, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </ChartContainer>
         </div>
@@ -747,144 +642,63 @@ export const AbandonedCallsDrillDown = () => {
 export const WaitTimeDrillDown = () => {
   const { waitTime } = drillDownData;
 
-  // Mock data for wait time trend
-  const waitTimeTrendData = [
-    { hour: '8 AM', waitTime: 45 },
-    { hour: '9 AM', waitTime: 65 },
-    { hour: '10 AM', waitTime: 95 },
-    { hour: '11 AM', waitTime: 85 },
-    { hour: '12 PM', waitTime: 70 },
-    { hour: '1 PM', waitTime: 55 },
-    { hour: '2 PM', waitTime: 75 },
-    { hour: '3 PM', waitTime: 90 },
-    { hour: '4 PM', waitTime: 110 },
-    { hour: '5 PM', waitTime: 120 }
-  ];
-
-  const waitTimeSpikes = [
-    {
-      time: '10:15 AM',
-      reason: 'Unexpected call volume spike due to system outage',
-      duration: '95 seconds'
-    },
-    {
-      time: '4:30 PM',
-      reason: 'Multiple agents on break simultaneously',
-      duration: '110 seconds'
-    },
-    {
-      time: '5:10 PM',
-      reason: 'End-of-day call surge with reduced staff',
-      duration: '120 seconds'
-    }
-  ];
-
   return (
     <div className="space-y-6">
       <div className="space-y-6 p-4">
         {/* Top Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
             title="Average Wait Time"
-            value="85s"
+            value={`${waitTime.avg}s`}
             icon={Clock}
-            trend={2.5}
+            trend={-8.6}
             className="bg-gradient-to-br from-blue-500 to-blue-600"
           />
           <MetricCard
-            title="Peak Wait Time"
-            value="120s"
-            icon={Target}
-            trend={5.8}
-            className="bg-gradient-to-br from-red-500 to-red-600"
-          />
-          <MetricCard
-            title="SLA Breaches"
-            value="12"
-            icon={PhoneCall}
-            trend={-1.2}
-            className="bg-gradient-to-br from-orange-500 to-orange-600"
-          />
-          <MetricCard
-            title="Current Wait Time"
-            value="45s"
-            icon={Timer}
-            trend={-0.8}
+            title="Under 30s"
+            value={`${waitTime.distribution[0].percentage}%`}
+            icon={CheckCircle}
+            trend={5.2}
             className="bg-gradient-to-br from-green-500 to-green-600"
           />
+          <MetricCard
+            title="Over 2m"
+            value={`${waitTime.distribution[3].percentage}%`}
+            icon={AlertTriangle}
+            trend={-2.1}
+            className="bg-gradient-to-br from-red-500 to-red-600"
+          />
+        </div>
+        {/* Department Breakdown */}
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Department Breakdown</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-[400px] w-full text-xs text-left">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-800">
+                  <th className="px-3 py-2 font-medium">Department</th>
+                  <th className="px-3 py-2 font-medium">Avg Wait Time (s)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {departmentMetrics.waitTime.map((row) => (
+                  <tr key={row.department}
+                    className="border-b border-gray-100 dark:border-gray-800 transition bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                  >
+                    <td className="px-3 py-2 flex items-center gap-2 font-medium">
+                      <Users className="h-4 w-4 text-blue-400" />
+                      {row.department}
+                    </td>
+                    <td className="px-3 py-2">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <ChartContainer title="Wait Time Trend (Today)">
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={waitTimeTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
-                <XAxis
-                  dataKey="hour"
-                  stroke="currentColor"
-                  fontSize={12}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke="currentColor"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  domain={[0, 'dataMax + 20']}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <ReferenceLine 
-                  y={60} 
-                  stroke={COLORS.danger} 
-                  strokeDasharray="3 3" 
-                  label={{ 
-                    value: 'Threshold', 
-                    position: 'right',
-                    fill: COLORS.danger,
-                    fontSize: 12
-                  }} 
-                />
-                <Line
-                  type="monotone"
-                  dataKey="waitTime"
-                  stroke={COLORS.primary}
-                  strokeWidth={2}
-                  dot={{ r: 4, fill: COLORS.primary }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartContainer>
-
-        <ChartContainer title="Wait Time Spikes">
-          <div className="space-y-4">
-            {waitTimeSpikes.map((spike, index) => (
-              <div 
-                key={index}
-                className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-700/30 rounded-lg p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Clock className="h-5 w-5 text-orange-500 dark:text-orange-400" />
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {spike.time}
-                    </span>
-                  </div>
-                  <span className="text-orange-600 dark:text-orange-400 font-medium">
-                    {spike.duration}
-                  </span>
-                </div>
-                <p className="mt-2 text-gray-600 dark:text-gray-300">
-                  {spike.reason}
-                </p>
-              </div>
-            ))}
-          </div>
-        </ChartContainer>
-
+        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Wait Time Distribution */}
           <ChartContainer title="Wait Time Distribution">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -898,7 +712,7 @@ export const WaitTimeDrillDown = () => {
                     innerRadius={80}
                     outerRadius={120}
                     paddingAngle={2}
-                    label={({ range, percentage }) => `${range} (${percentage}%)`}
+                    label={({ name, percentage }) => `${name} (${percentage}%)`}
                   >
                     {waitTime.distribution.map((_entry, index) => (
                       <Cell 
@@ -913,14 +727,13 @@ export const WaitTimeDrillDown = () => {
             </div>
           </ChartContainer>
 
-          {/* Wait Time by Queue */}
-          <ChartContainer title="Wait Time by Queue">
+          <ChartContainer title="Wait Time by Time of Day">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={waitTime.byQueue}>
+                <BarChart data={waitTime.byTimeOfDay}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
                   <XAxis 
-                    dataKey="name" 
+                    dataKey="hour" 
                     stroke="currentColor"
                     fontSize={12}
                     tickLine={false}
@@ -930,22 +743,42 @@ export const WaitTimeDrillDown = () => {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
+                    tickFormatter={(value) => `${value}s`}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar 
-                    dataKey="value" 
-                    fill={COLORS.primary}
-                    radius={[4, 4, 0, 0]}
-                  >
-                    {waitTime.byQueue.map((_entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`}
-                        fill={COLORS.primary}
-                        fillOpacity={0.8}
-                      />
-                    ))}
-                  </Bar>
+                  <Bar dataKey="value" fill={COLORS.primary} />
                 </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartContainer>
+
+          <ChartContainer title="Daily Wait Time Trend">
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={waitTime.trends.daily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
+                  <XAxis 
+                    dataKey="day" 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    stroke="currentColor"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}s`}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={COLORS.primary}
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.primary, stroke: COLORS.primary, r: 4 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </ChartContainer>
@@ -957,203 +790,185 @@ export const WaitTimeDrillDown = () => {
 
 // AI & vCons Insights Drill-downs
 export const SentimentDrillDown = () => {
-  const sentimentData = [
-    { department: 'Sales', positive: 82, neutral: 12, negative: 6 },
-    { department: 'Support', positive: 75, neutral: 15, negative: 10 },
-    { department: 'Billing', positive: 68, neutral: 22, negative: 10 },
-  ];
+  // Consistent mock data
+  const totalInteractions = 1248; // from dailyData in mockData
+  const prevPositive = 62; // previous period positive %
+  const prevFrustrated = 17; // previous period frustrated %
+  const positiveDelta = customerMoodData.overall.positive - prevPositive;
+  const frustratedDelta = customerMoodData.overall.frustrated - prevFrustrated;
+  const mostFrustratedChannel = [
+    { name: 'Call', value: 60, type: 'positive' },
+    { name: 'Chat', value: 20, type: 'positive' },
+    { name: 'Email', value: 10, type: 'positive' },
+    { name: 'SMS', value: 10, type: 'frustrated' }
+  ].reduce((max, curr) => curr.type === 'frustrated' && curr.value > max.value ? curr : max, { name: '', value: 0, type: '' });
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium mb-4">Sentiment by Department</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={sentimentData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="department" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="positive" fill="#22c55e" />
-              <Bar dataKey="neutral" fill="#94a3b8" />
-              <Bar dataKey="negative" fill="#ef4444" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium mb-4">Weekly Sentiment Trend</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={[
-              { week: 'W1', sentiment: 75 },
-              { week: 'W2', sentiment: 78 },
-              { week: 'W3', sentiment: 82 },
-              { week: 'W4', sentiment: 78 },
-            ]}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="sentiment" stroke="#3b82f6" />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ChartContainer title="Overall Customer Mood">
+          <div className="h-[180px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Positive', value: customerMoodData.overall.positive },
+                    { name: 'Neutral', value: customerMoodData.overall.neutral },
+                    { name: 'Frustrated', value: customerMoodData.overall.frustrated }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={60}
+                  paddingAngle={2}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  <Cell fill="var(--chart-green, #22c55e)" />
+                  <Cell fill="var(--chart-yellow, #eab308)" />
+                  <Cell fill="var(--chart-red, #ef4444)" />
+                </Pie>
+                <Tooltip 
+                  formatter={(value: number) => [`${value}%`, 'Percentage']}
+                  contentStyle={{ 
+                    backgroundColor: 'var(--tooltip-bg, #fff)',
+                    border: '1px solid var(--tooltip-border, #e5e7eb)',
+                    borderRadius: '0.5rem',
+                    color: 'var(--tooltip-color, #1f2937)'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 text-xs text-gray-700 dark:text-gray-300 space-y-1">
+            <div>Based on <span className="font-semibold">{totalInteractions.toLocaleString()}</span> interactions yesterday</div>
+            <div>
+              <span className="text-green-600 dark:text-green-400 font-semibold">Positive</span> mood {positiveDelta >= 0 ? 'up' : 'down'} {Math.abs(positiveDelta)}% vs last period. <span className="text-red-600 dark:text-red-400 font-semibold">Frustrated</span> {frustratedDelta >= 0 ? 'up' : 'down'} {Math.abs(frustratedDelta)}%.
+            </div>
+            <div>
+              {customerMoodData.overall.frustrated > 20 ? (
+                <span className="text-red-600 dark:text-red-400 font-semibold">Frustration is above threshold. Review escalation protocols.</span>
+              ) : (
+                <span className="text-green-600 dark:text-green-400 font-semibold">Customer mood is stable. Keep monitoring sentiment drivers.</span>
+              )}
+            </div>
+          </div>
+        </ChartContainer>
+
+        <ChartContainer title="Customer Mood by Channel">
+          <div className="h-[180px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Call', value: 60 },
+                    { name: 'Chat', value: 20 },
+                    { name: 'Email', value: 10 },
+                    { name: 'SMS', value: 10 }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={60}
+                  paddingAngle={2}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  <Cell fill="#3b82f6" />
+                  <Cell fill="#22c55e" />
+                  <Cell fill="#eab308" />
+                  <Cell fill="#ef4444" />
+                </Pie>
+                <Tooltip 
+                  formatter={(value: number) => [`${value}%`, 'Percentage']}
+                  contentStyle={{ 
+                    backgroundColor: 'var(--tooltip-bg, #fff)',
+                    border: '1px solid var(--tooltip-border, #e5e7eb)',
+                    borderRadius: '0.5rem',
+                    color: 'var(--tooltip-color, #1f2937)'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 text-xs text-gray-700 dark:text-gray-300 space-y-1">
+            <div>Based on <span className="font-semibold">{totalInteractions.toLocaleString()}</span> interactions yesterday</div>
+            <div>
+              <span className="text-blue-600 dark:text-blue-400 font-semibold">Call</span> channel has the highest positive mood (60%).
+              <span className="ml-2 text-red-600 dark:text-red-400 font-semibold">SMS</span> has the highest frustration (15%).
+            </div>
+            <div>
+              {mostFrustratedChannel.value > 10 ? (
+                <span className="text-red-600 dark:text-red-400 font-semibold">Review SMS scripts and escalation handling for improvement.</span>
+              ) : (
+                <span className="text-green-600 dark:text-green-400 font-semibold">No channel-specific mood risks detected.</span>
+              )}
+            </div>
+          </div>
+        </ChartContainer>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium mb-4">Top Phrases</h3>
-          <div className="flex flex-wrap gap-2">
-            {['excellent service', 'helpful staff', 'quick resolution', 'frustrating', 'long wait'].map((phrase, i) => (
-              <span key={i} className="px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                {phrase}
-              </span>
-            ))}
+      {/* Insights Grid: Top Issues, Frustration Drivers, Sample Phrases, Top Positive Phrases */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Top Issues by Channel */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 h-full flex flex-col">
+          <h3 className="text-base font-semibold mb-4 text-gray-900 dark:text-white">Top Issues by Channel</h3>
+          <div className="overflow-x-auto flex-1">
+            <table className="min-w-[320px] w-full text-xs text-left">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-800">
+                  <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Issue</th>
+                  <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Chat</th>
+                  <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Email</th>
+                  <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">SMS</th>
+                  <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Call</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topIssuesByChannel.map((row, idx) => (
+                  <tr key={row.issue} className={`border-b border-gray-100 dark:border-gray-800 transition ${idx % 2 === 1 ? 'bg-gray-50 dark:bg-gray-900/60' : 'bg-white dark:bg-gray-900'} hover:bg-blue-50 dark:hover:bg-blue-900/30`}>
+                    <td className="px-3 py-2 text-gray-900 dark:text-white font-medium">{row.issue}</td>
+                    <td className="px-3 py-2 text-gray-900 dark:text-white">{row.chat}</td>
+                    <td className="px-3 py-2 text-gray-900 dark:text-white">{row.email}</td>
+                    <td className="px-3 py-2 text-gray-900 dark:text-white">{row.sms}</td>
+                    <td className="px-3 py-2 text-gray-900 dark:text-white">{row.call}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium mb-4">Example Conversations</h3>
-          <div className="space-y-3">
-            {[1, 2].map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
-                <div className="flex items-center gap-2">
-                  <Play className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm">Call #{i + 1}</span>
+        {/* Sample Phrases */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 h-full flex flex-col">
+          <h3 className="text-base font-semibold mb-4 text-gray-900 dark:text-white">Sample Phrases</h3>
+          <ul className="space-y-3 flex-1">
+            {frustrationDrivers.map((d) => (
+              <li key={d.trigger} className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-3">
+                <span className="block text-xs text-gray-500 dark:text-gray-300 mb-1">{d.trigger}</span>
+                <span className="text-sm text-gray-900 dark:text-white">"{d.sample}"</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Top Positive Phrases */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 h-full flex flex-col">
+          <h3 className="text-base font-semibold mb-4 text-gray-900 dark:text-white">Top Positive Phrases</h3>
+          <ul className="space-y-3 flex-1">
+            {topPositivePhrases.map((item) => (
+              <li key={item.phrase} className="flex items-center justify-between bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
+                <div>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{item.phrase}</span>
+                  <span className="block text-xs text-gray-500 dark:text-gray-300 mt-1">Channels: {item.channels.join(', ')}</span>
                 </div>
-                <span className="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                  Positive
-                </span>
-              </div>
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">{item.count} mentions</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export const RiskAlertsDrillDown = () => {
-  const alerts = [
-    { id: 1, type: 'Compliance', level: 'High', time: '5m ago', details: 'Script Deviation' },
-    { id: 2, type: 'Sentiment', level: 'Medium', time: '15m ago', details: 'Negative Escalation' },
-    { id: 3, type: 'Compliance', level: 'High', time: '1h ago', details: 'Missing Disclosure' },
-  ];
-
-  return (
-    <div className="space-y-4">
-      {alerts.map((alert) => (
-        <div key={alert.id} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className={`h-5 w-5 ${
-                alert.level === 'High' ? 'text-red-500' : 'text-yellow-500'
-              }`} />
-              <span className="font-medium">{alert.type} Alert</span>
-            </div>
-            <span className="text-sm text-gray-500">{alert.time}</span>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{alert.details}</p>
-          <div className="flex gap-2">
-            <button className="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-              View Transcript
-            </button>
-            <button className="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-              Play Recording
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-export const ForecastDrillDown = () => {
-  const forecastData = [
-    { hour: '9AM', predicted: 120, actual: 115 },
-    { hour: '10AM', predicted: 150, actual: 145 },
-    { hour: '11AM', predicted: 180, actual: 170 },
-    { hour: '12PM', predicted: 140, actual: 150 },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-        <h3 className="text-sm font-medium mb-4">Call Volume Forecast vs Actual</h3>
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={forecastData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="hour" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="predicted" stroke="#3b82f6" name="Predicted" />
-            <Line type="monotone" dataKey="actual" stroke="#22c55e" name="Actual" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium mb-2">SLA Risk</h3>
-          <div className="flex items-center gap-2">
-            <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-yellow-500 rounded-full" style={{ width: '25%' }} />
-            </div>
-            <span className="text-sm text-yellow-500">25% Risk</span>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium mb-2">Abandonment Risk</h3>
-          <div className="flex items-center gap-2">
-            <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-red-500 rounded-full" style={{ width: '15%' }} />
-            </div>
-            <span className="text-sm text-red-500">15% Risk</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Agent Performance Drill-downs
-export const AgentPerformanceDrillDown = () => {
-  const metrics = [
-    { name: 'Avg Handle Time', value: '5m 30s' },
-    { name: 'Sentiment Score', value: '4.5/5' },
-    { name: 'Escalation Rate', value: '3%' },
-    { name: 'Script Adherence', value: '95%' },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        {metrics.map((metric) => (
-          <div key={metric.name} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-            <h3 className="text-sm text-gray-500 dark:text-gray-400">{metric.name}</h3>
-            <p className="text-lg font-semibold mt-1">{metric.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-        <h3 className="text-sm font-medium mb-4">Team Performance Comparison</h3>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={[
-            { team: 'Team A', performance: 85 },
-            { team: 'Team B', performance: 92 },
-            { team: 'Team C', performance: 78 },
-          ]}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="team" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="performance" fill="#3b82f6" />
-          </BarChart>
-        </ResponsiveContainer>
       </div>
     </div>
   );
@@ -1161,14 +976,38 @@ export const AgentPerformanceDrillDown = () => {
 
 // Omnichannel Trends Drill-downs
 export const ChannelPerformanceDrillDown = () => {
-  const channelData = [
-    { name: 'Voice', value: 45 },
-    { name: 'Chat', value: 30 },
-    { name: 'Email', value: 15 },
-    { name: 'Social', value: 10 },
+  // Build channel distribution from omnichannelTrendsData.interactions
+  const channelTotals = [
+    {
+      name: 'Voice',
+      value: omnichannelTrendsData.interactions.reduce((sum, d) => sum + (d.voice || 0), 0),
+      percentage: 0 // can be calculated if needed
+    },
+    {
+      name: 'Chat',
+      value: omnichannelTrendsData.interactions.reduce((sum, d) => sum + (d.chat || 0), 0),
+      percentage: 0
+    },
+    {
+      name: 'SMS',
+      value: omnichannelTrendsData.interactions.reduce((sum, d) => sum + (d.sms || 0), 0),
+      percentage: 0
+    },
+    {
+      name: 'Email',
+      value: omnichannelTrendsData.interactions.reduce((sum, d) => sum + (d.email || 0), 0),
+      percentage: 0
+    }
   ];
+  const total = channelTotals.reduce((sum, c) => sum + c.value, 0);
+  channelTotals.forEach(c => c.percentage = Math.round((c.value / total) * 100));
 
-  const COLORS = ['#3b82f6', '#22c55e', '#eab308', '#ef4444'];
+  // Build response time data from effectiveness
+  const responseTime = omnichannelTrendsData.effectiveness.map(e => ({
+    channel: e.channel,
+    value: parseInt(e.resolution),
+    unit: e.resolution.replace(/\d+/g, '')
+  }));
 
   return (
     <div className="space-y-6">
@@ -1178,21 +1017,27 @@ export const ChannelPerformanceDrillDown = () => {
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
-                data={channelData}
+                data={channelTotals}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
                 fill="#8884d8"
-                label
+                label={({ name, percentage }: any) => `${name} (${percentage}%)`}
               >
-                {channelData.map((_entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {channelTotals.map((_entry, index) => (
+                  <Cell key={`cell-${index}`} fill={Object.values(COLORS.gradients)[index % Object.values(COLORS.gradients).length][0]} />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend />
+              <Tooltip 
+                formatter={(value: number) => [`${value} calls`, 'Volume']}
+                contentStyle={{ 
+                  backgroundColor: 'var(--tooltip-bg, #fff)',
+                  border: '1px solid var(--tooltip-border, #e5e7eb)',
+                  borderRadius: '0.5rem',
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -1200,12 +1045,31 @@ export const ChannelPerformanceDrillDown = () => {
         <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
           <h3 className="text-sm font-medium mb-4">Response Time by Channel</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={channelData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#3b82f6" />
+            <BarChart data={responseTime}>
+              <CartesianGrid strokeDasharray="3 3" className="text-gray-200 dark:text-gray-700" />
+              <XAxis 
+                dataKey="channel" 
+                fontSize={11} 
+                className="text-gray-600 dark:text-gray-200"
+                tick={{ fill: 'currentColor' }}
+                axisLine={{ stroke: 'currentColor' }}
+              />
+              <YAxis 
+                fontSize={11} 
+                className="text-gray-600 dark:text-gray-200"
+                tick={{ fill: 'currentColor' }}
+                axisLine={{ stroke: 'currentColor' }}
+              />
+              <Tooltip 
+                formatter={(value: number, _name: string, props: any) => [`${value}${props.payload.unit}`, 'Response Time']}
+                contentStyle={{ 
+                  backgroundColor: 'var(--tooltip-bg, #fff)',
+                  border: '1px solid var(--tooltip-border, #e5e7eb)',
+                  borderRadius: '0.5rem',
+                  color: 'var(--tooltip-color, #1f2937)'
+                }}
+              />
+              <Bar dataKey="value" fill={COLORS.primary} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -1214,15 +1078,25 @@ export const ChannelPerformanceDrillDown = () => {
       <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
         <h3 className="text-sm font-medium mb-4">Channel Effectiveness</h3>
         <div className="space-y-4">
-          {channelData.map((channel) => (
-            <div key={channel.name} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          {omnichannelTrendsData.effectiveness.map((channel) => (
+            <div key={channel.channel} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
+              <div className="flex items-center space-x-3">
                 <MessageSquare className="h-4 w-4 text-blue-500" />
-                <span className="text-sm font-medium">{channel.name}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white">{channel.channel}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm">CSAT: 4.5/5</span>
-                <span className="text-sm">FCR: 85%</span>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">CSAT:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{channel.csat}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Resolution:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{channel.resolution}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Positive:</span>
+                  <span className="text-sm font-medium text-green-600 dark:text-green-400">{channel.sentiment.positive}%</span>
+                </div>
               </div>
             </div>
           ))}
@@ -1305,4 +1179,31 @@ export const BusinessOutcomesDrillDown = () => {
       </div>
     </div>
   );
-}; 
+};
+
+// Mock data for top issues by channel
+const topIssuesByChannel = [
+  { issue: 'Long wait times', chat: 2, email: 0, sms: 0, call: 15 },
+  { issue: 'Unclear instructions', chat: 8, email: 3, sms: 1, call: 4 },
+  { issue: 'Transfer required', chat: 1, email: 0, sms: 0, call: 10 },
+  { issue: 'Technical difficulties', chat: 0, email: 2, sms: 0, call: 8 },
+  { issue: 'Inconsistent information', chat: 2, email: 2, sms: 0, call: 6 },
+];
+
+// Mock data for frustration drivers
+const frustrationDrivers = [
+  { trigger: 'Long wait times', count: 15, sample: 'I waited too long to get help.' },
+  { trigger: 'Unclear instructions', count: 12, sample: 'I didn\'t understand what to do next.' },
+  { trigger: 'Transfer required', count: 10, sample: 'I was transferred too many times.' },
+  { trigger: 'Technical difficulties', count: 8, sample: 'The system kept crashing.' },
+  { trigger: 'Inconsistent information', count: 6, sample: 'I got different answers from different agents.' },
+];
+
+// Mock data for top positive phrases
+const topPositivePhrases = [
+  { phrase: 'Very helpful and professional', count: 45, channels: ['Call', 'Chat'] },
+  { phrase: 'Resolved my issue quickly', count: 38, channels: ['Call'] },
+  { phrase: 'Excellent service', count: 32, channels: ['Email', 'Call'] },
+  { phrase: 'Very knowledgeable', count: 28, channels: ['Call', 'Chat'] },
+  { phrase: 'Great communication', count: 25, channels: ['Call', 'SMS'] },
+]; 

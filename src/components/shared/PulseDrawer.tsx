@@ -1,6 +1,8 @@
-import { Fragment, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, Sparkles, Send, TrendingUp, Clock, PhoneCall, DollarSign } from 'lucide-react';
+import { Fragment, useState } from 'react';
+import { customerMoodData, dailyData, churnRiskData } from '../../data/mockData';
 
 interface PulseDrawerProps {
   isOpen: boolean;
@@ -10,29 +12,36 @@ interface PulseDrawerProps {
 const preQueriedQuestions = [
   {
     icon: TrendingUp,
-    text: "What's our current customer satisfaction trend compared to last quarter?",
-    answer: "Your CSAT score has improved by 12% this quarter, rising from 78% to 90%. This improvement correlates with reduced wait times and increased first-call resolution rates."
+    text: "What's our current customer satisfaction trend compared to last period?",
+    answer: `Yesterday's customer mood: Positive ${customerMoodData.overall.positive}%, Neutral ${customerMoodData.overall.neutral}%, Frustrated ${customerMoodData.overall.frustrated}%. Positive is up 3% vs last period. Frustration is down 2%.` 
   },
   {
     icon: Clock,
-    text: "What's our average handling time and how can we improve it?",
-    answer: "Current AHT is 4m 35s, which is 45s above target. Top opportunities: streamline call routing (save ~15s), enhance agent knowledge base (save ~20s), and improve CRM integration (save ~10s)."
+    text: "What's our average wait time and how does it compare to target?",
+    answer: `Average wait time yesterday was ${dailyData.avgWaitTime}s. This is within the target range (target: 45s). Most departments are under 45s except Sales (41s) and Technical (39s).` 
   },
   {
     icon: PhoneCall,
-    text: "Which call queues are experiencing the highest abandonment rates?",
-    answer: "Technical Support has the highest abandonment rate at 12%, followed by Billing at 8%. Peak abandonment occurs between 2-4 PM, suggesting a need for additional staffing during these hours."
+    text: "How many calls were abandoned and which department is most affected?",
+    answer: `81 calls were abandoned yesterday (${dailyData.abandonmentRate}%). Sales had the highest abandoned calls (22), followed by Support (18).` 
   },
   {
     icon: DollarSign,
-    text: "What's the potential revenue impact of our current call center performance?",
-    answer: "Based on current metrics, call center inefficiencies may impact revenue by $280K monthly. Main factors: abandoned calls (60%), long wait times (25%), and low first-call resolution (15%)."
+    text: "How many high churn risk customers do we have?",
+    answer: `${churnRiskData.filter(r => r.riskScore > 80).length} high churn risk customers detected yesterday. Main factors: service quality and support response. Priority retention action recommended.`
   }
 ];
 
 const PulseDrawer = ({ isOpen, onClose }: PulseDrawerProps) => {
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
+  const answerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedQuestion && answerRef.current) {
+      answerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedQuestion]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -104,7 +113,7 @@ const PulseDrawer = ({ isOpen, onClose }: PulseDrawerProps) => {
                           </div>
 
                           {selectedQuestion && (
-                            <div className="mt-6 animate-fade-in">
+                            <div ref={answerRef} className="mt-6 animate-fade-in">
                               <div className="flex items-start space-x-4">
                                 <div className="flex-shrink-0">
                                   <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">

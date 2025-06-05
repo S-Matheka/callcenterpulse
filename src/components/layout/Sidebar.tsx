@@ -2,9 +2,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
-  HeartHandshake, 
-  PhoneCall, 
-  TrendingUp,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -28,24 +25,14 @@ const navItems = [
     path: '/' 
   },
   { 
+    title: 'Supervisor', 
+    icon: Users, 
+    path: '/supervisor' 
+  },
+  { 
     title: 'Agent Performance', 
     icon: Users, 
     path: '/agent-performance' 
-  },
-  { 
-    title: 'Customer Insights', 
-    icon: HeartHandshake, 
-    path: '/customer-insights' 
-  },
-  { 
-    title: 'Call Review', 
-    icon: PhoneCall, 
-    path: '/call-review' 
-  },
-  { 
-    title: 'Business Outcomes', 
-    icon: TrendingUp, 
-    path: '/business-outcomes' 
   },
 ];
 

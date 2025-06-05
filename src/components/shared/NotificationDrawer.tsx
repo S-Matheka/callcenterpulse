@@ -1,4 +1,5 @@
 import { X, AlertTriangle, AlertCircle, AlertOctagon } from 'lucide-react';
+import { dailyData, customerMoodData, churnRiskData } from '../../data/mockData';
 
 interface Notification {
   id: string;
@@ -16,25 +17,46 @@ interface NotificationDrawerProps {
 const NotificationDrawer = ({ isOpen, onClose }: NotificationDrawerProps) => {
   const notifications: Notification[] = [
     {
-      id: '1',
-      title: 'High Call Volume Alert',
-      message: 'Call volume has exceeded threshold by 25%. Consider adding more agents.',
-      severity: 'high',
-      timestamp: '2 minutes ago'
+      id: 'calls',
+      title: 'Total Calls Yesterday',
+      message: `There were ${dailyData.totalCalls.toLocaleString()} calls handled.`,
+      severity: dailyData.totalCalls > 1200 ? 'medium' : 'low',
+      timestamp: 'Today'
     },
     {
-      id: '2',
-      title: 'System Performance Warning',
-      message: 'Call recording system experiencing delays. Some calls may not be recorded.',
-      severity: 'medium',
-      timestamp: '15 minutes ago'
+      id: 'answered',
+      title: 'Answered Calls',
+      message: `${dailyData.totalAnswered.toLocaleString()} calls were answered (${dailyData.answerRate}%).`,
+      severity: dailyData.answerRate < 70 ? 'medium' : 'low',
+      timestamp: 'Today'
     },
     {
-      id: '3',
-      title: 'Queue Status Update',
-      message: 'Support queue wait time has increased to 8 minutes.',
-      severity: 'low',
-      timestamp: '30 minutes ago'
+      id: 'abandoned',
+      title: 'Abandoned Calls',
+      message: `${dailyData.totalAbandoned} calls were abandoned (${dailyData.abandonmentRate}%).`,
+      severity: dailyData.abandonmentRate > 8 ? 'high' : dailyData.abandonmentRate > 6 ? 'medium' : 'low',
+      timestamp: 'Today'
+    },
+    {
+      id: 'wait',
+      title: 'Average Wait Time',
+      message: `Average wait time was ${dailyData.avgWaitTime}s.`,
+      severity: dailyData.avgWaitTime > 45 ? 'medium' : 'low',
+      timestamp: 'Today'
+    },
+    {
+      id: 'mood',
+      title: 'Customer Mood',
+      message: `Positive: ${customerMoodData.overall.positive}%, Neutral: ${customerMoodData.overall.neutral}%, Frustrated: ${customerMoodData.overall.frustrated}%.`,
+      severity: customerMoodData.overall.frustrated > 20 ? 'high' : customerMoodData.overall.frustrated > 15 ? 'medium' : 'low',
+      timestamp: 'Today'
+    },
+    {
+      id: 'churn',
+      title: 'Churn Risk Alerts',
+      message: `${churnRiskData.filter(r => r.riskScore > 80).length} high churn risk customers detected.`,
+      severity: churnRiskData.filter(r => r.riskScore > 80).length > 0 ? 'high' : 'low',
+      timestamp: 'Today'
     }
   ];
 

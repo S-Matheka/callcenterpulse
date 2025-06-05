@@ -1,30 +1,32 @@
 import { useState } from 'react';
 import { 
   TrendingUp, TrendingDown, Phone, PhoneCall, Clock, X, 
-  Brain, Users, Globe, Briefcase, AlertTriangle, Award
+  Brain, Users, Globe, AlertTriangle, Award
 } from 'lucide-react';
 import Modal from '../components/shared/Modal';
 import { 
   TotalCallsDrillDown, 
   TotalAnsweredDrillDown, 
   AbandonedCallsDrillDown, 
-  WaitTimeDrillDown
+  WaitTimeDrillDown,
+  SentimentDrillDown
 } from '../components/dashboard/DrillDownViews';
-import { dailyData } from '../data/mockData';
+import { dailyData, churnRiskData, omnichannelTrendsData } from '../data/mockData';
 import { 
   ResponsiveContainer, 
-  LineChart, 
   CartesianGrid, 
   XAxis, 
   YAxis, 
   Tooltip, 
-  Line, 
   Legend, 
   BarChart,
   Bar,
   AreaChart, 
   Area 
 } from 'recharts';
+import ChurnRiskTable from '../components/business-outcomes/ChurnRiskTable';
+import { flaggedCalls } from './SupervisorDashboard';
+import { AGENTS } from '../components/agents/AgentTab';
 
 const AbandonedCallIcon = ({ className }: { className?: string }) => (
   <div className={`relative ${className}`}>
@@ -114,6 +116,7 @@ const SectionCard = ({ title, icon: Icon, children, className = '', onClick }: S
 
 const Dashboard = () => {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const [flaggedModal, setFlaggedModal] = useState<null | { call: typeof flaggedCalls[0], agent: typeof AGENTS[0] | undefined }>(null);
 
   // Get user's first name from localStorage
   const userEmail = localStorage.getItem('userEmail') || '';
@@ -208,176 +211,24 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="columns-1 lg:columns-2 gap-6 space-y-6 [&>*]:break-inside-avoid-column">
-        <div>
-          <SectionCard title="AI & vCons Insights" icon={Brain}>
-            <div className="space-y-4">
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100 mb-3">Customer Sentiment</h3>
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="h-12 w-12 text-yellow-400">
-                    <span className="text-4xl">😀</span>
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold text-green-600 dark:text-green-400">Very Positive</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-200">Positive</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">65%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: '65%' }} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-200">Neutral</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">25%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="h-full bg-gray-500 dark:bg-gray-500 rounded-full" style={{ width: '25%' }} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-200">Negative</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">10%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                    <div className="h-full bg-red-500 rounded-full" style={{ width: '10%' }} />
-                  </div>
-                </div>
-              </div>
+      {/* AI & vCons Insights - Full Width */}
+      <div>
+        <SectionCard title="AI & vCons Insights" icon={Brain}>
+          <div>
+            <SentimentDrillDown />
+          </div>
+        </SectionCard>
+      </div>
 
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100 mb-3">Top Sentiment Phrases</h3>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { text: 'helpful', count: 85, sentiment: 'positive' },
-                    { text: 'satisfied', count: 76, sentiment: 'positive' },
-                    { text: 'quick', count: 75, sentiment: 'positive' },
-                    { text: 'resolved', count: 70, sentiment: 'positive' },
-                    { text: 'professional', count: 63, sentiment: 'positive' }
-                  ].map((phrase) => (
-                    <div key={phrase.text} className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        phrase.sentiment === 'positive' 
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                          : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                      }`}>
-                        {phrase.text}
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-300">{phrase.count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100">Risk Alerts</h3>
-                  <span className="text-xs bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300 px-2 py-1 rounded-full">
-                    2 High Priority
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center space-x-2">
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                        <span className="font-medium text-red-700 dark:text-red-400">Compliance Violation</span>
-                      </div>
-                      <span className="text-sm text-red-600 dark:text-red-400">10:05 AM</span>
-                    </div>
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      Agent failed to verify customer identity before discussing account details.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100">AI Forecast</h3>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-300">
-                    <span>Current Time: 1:01 PM</span>
-                    <span>•</span>
-                    <span>Avg. Predicted: 72 calls</span>
-                  </div>
-                </div>
-                <div className="h-40">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={[
-                      { time: '8 AM', actual: 45, predicted: 42 },
-                      { time: '9 AM', actual: 52, predicted: 48 },
-                      { time: '10 AM', actual: 58, predicted: 55 },
-                      { time: '11 AM', actual: 65, predicted: 62 },
-                      { time: '12 PM', actual: 72, predicted: 70 },
-                      { time: '1 PM', predicted: 75 },
-                      { time: '2 PM', predicted: 78 },
-                      { time: '3 PM', predicted: 72 }
-                    ]}>
-                      <CartesianGrid strokeDasharray="3 3" className="text-gray-200 dark:text-gray-700" />
-                      <XAxis 
-                        dataKey="time" 
-                        fontSize={11} 
-                        className="text-gray-600 dark:text-gray-200"
-                        tick={{ fill: 'currentColor' }}
-                        axisLine={{ stroke: 'currentColor' }}
-                      />
-                      <YAxis 
-                        fontSize={11} 
-                        className="text-gray-600 dark:text-gray-200"
-                        tick={{ fill: 'currentColor' }}
-                        axisLine={{ stroke: 'currentColor' }}
-                      />
-                      <Tooltip
-                        contentStyle={{ 
-                          backgroundColor: 'var(--tooltip-bg, #fff)',
-                          border: '1px solid var(--tooltip-border, #e5e7eb)',
-                          borderRadius: '0.5rem',
-                          color: 'var(--tooltip-color, #1f2937)',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                        }}
-                        itemStyle={{ color: 'currentColor' }}
-                        labelStyle={{ color: 'currentColor', fontWeight: 'bold' }}
-                      />
-                      <Legend 
-                        wrapperStyle={{ fontSize: '11px' }}
-                        formatter={(value) => (
-                          <span className="text-gray-700 dark:text-gray-200">{value}</span>
-                        )}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="actual" 
-                        name="Actual" 
-                        stroke="var(--chart-blue, #3b82f6)"
-                        strokeWidth={2}
-                        dot={{ fill: 'var(--chart-blue, #3b82f6)', stroke: 'var(--chart-blue, #3b82f6)', r: 4 }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="predicted" 
-                        name="Predicted"
-                        stroke="var(--chart-gray, #9ca3af)"
-                        strokeDasharray="5 5"
-                        strokeWidth={2}
-                        dot={{ fill: 'var(--chart-gray, #9ca3af)', stroke: 'var(--chart-gray, #9ca3af)', r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-          </SectionCard>
-        </div>
-
-        <div>
+      {/* Other Cards in 2 Columns */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-6">
           <SectionCard title="Agent Performance" icon={Users}>
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-100">Top Performers</span>
-                  <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View All</button>
+                  <a href="/agent-performance" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View All</a>
                 </div>
                 <div className="space-y-1.5">
                   {[
@@ -475,178 +326,82 @@ const Dashboard = () => {
               </div>
             </div>
           </SectionCard>
-        </div>
-
-        <div>
-          <SectionCard title="Business Outcomes" icon={Briefcase}>
-            <div className="space-y-4">
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100">Revenue Attribution</h3>
-                  <span className="text-sm text-green-600 dark:text-green-400">+12.5% vs Last Month</span>
-                </div>
-                <div className="mb-4">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">$42,580</p>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { label: 'Support', value: '$12,450' },
-                    { label: 'Sales', value: '$24,830' },
-                    { label: 'Billing', value: '$5,300' }
-                  ].map((item) => (
-                    <div key={item.label} className="text-center">
-                      <p className="text-sm text-gray-500 dark:text-gray-300">{item.label}</p>
-                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-100">{item.value}</p>
-                    </div>
-                  ))}
-                </div>
+          <SectionCard title="Omnichannel Trends" icon={Globe}>
+            <div className="mb-8">
+              <h3 className="text-base font-semibold mb-2 text-gray-900 dark:text-white">Interactions by Channel</h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={omnichannelTrendsData.interactions} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="voice" stackId="1" stroke="#3b82f6" fill="#3b82f6" name="Voice" />
+                    <Area type="monotone" dataKey="chat" stackId="1" stroke="#22c55e" fill="#22c55e" name="Chat" />
+                    <Area type="monotone" dataKey="sms" stackId="1" stroke="#f59e0b" fill="#f59e0b" name="SMS" />
+                    <Area type="monotone" dataKey="email" stackId="1" stroke="#ef4444" fill="#ef4444" name="Email" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
-
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100 mb-3">Conversion Funnel</h3>
-                <div className="space-y-2">
-                  {[
-                    { stage: 'Calls Received', value: 1248, width: '100%' },
-                    { stage: 'Issue Identified', value: 892, width: '80%' },
-                    { stage: 'Solution Offered', value: 524, width: '60%' },
-                    { stage: 'Upsell Opportunity', value: 248, width: '40%' },
-                    { stage: 'Converted', value: 124, width: '20%' }
-                  ].map((stage) => (
-                    <div key={stage.stage} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">{stage.stage}</span>
-                        <span className="text-gray-700 dark:text-gray-200">{stage.value}</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 dark:bg-blue-400 rounded-full"
-                          style={{ width: stage.width }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100 mb-3">Churn Risk Alerts</h3>
-                <div className="space-y-2">
-                  {[
-                    {
-                      company: 'Acme Corp',
-                      risk: 'High',
-                      revenue: '$12,500',
-                      details: 'Multiple unresolved technical issues in past 30 days'
-                    },
-                    {
-                      company: 'Global Industries',
-                      risk: 'Medium',
-                      revenue: '$8,750',
-                      details: 'Contract renewal discussion showed price sensitivity'
-                    }
-                  ].map((alert) => (
-                    <div key={alert.company} className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                      <div className="flex items-center justify-between mb-1">
-                        <div>
-                          <h4 className="text-sm font-medium text-red-700 dark:text-red-400">{alert.company}</h4>
-                          <p className="text-xs text-red-600 dark:text-red-400">{alert.details}</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-sm font-medium text-red-700 dark:text-red-400">{alert.revenue}</span>
-                          <p className="text-xs text-red-600 dark:text-red-400">at risk</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            </div>
+            <div>
+              <h3 className="text-base font-semibold mb-2 text-gray-900 dark:text-white">Channel Effectiveness</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {omnichannelTrendsData.effectiveness.map((channel) => (
+                  <div key={channel.channel} className="flex flex-col gap-1 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                    <span className="font-semibold text-gray-900 dark:text-white mb-1">{channel.channel}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-300">CSAT <span className="font-bold text-gray-900 dark:text-white">{channel.csat}%</span></span>
+                    <span className="text-sm text-gray-500 dark:text-gray-300">Resolution <span className="font-bold text-gray-900 dark:text-white">{channel.resolution}</span></span>
+                  </div>
+                ))}
               </div>
             </div>
           </SectionCard>
         </div>
-
-        <div>
-          <SectionCard title="Omnichannel Trends" icon={Globe}>
-            <div className="space-y-3">
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-3">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Interactions by Channel</h3>
-                <div className="h-40">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={[
-                      { date: 'Apr 24', voice: 450, chat: 280, sms: 180, email: 90 },
-                      { date: 'Apr 25', voice: 480, chat: 300, sms: 190, email: 85 },
-                      { date: 'Apr 26', voice: 460, chat: 290, sms: 185, email: 95 },
-                      { date: 'Apr 27', voice: 470, chat: 310, sms: 195, email: 88 },
-                      { date: 'Apr 28', voice: 490, chat: 320, sms: 200, email: 92 },
-                      { date: 'Apr 29', voice: 465, chat: 305, sms: 188, email: 87 },
-                      { date: 'Apr 30', voice: 485, chat: 315, sms: 192, email: 94 }
-                    ]}>
-                      <CartesianGrid strokeDasharray="3 3" className="text-gray-200 dark:text-gray-700" />
-                      <XAxis 
-                        dataKey="date" 
-                        fontSize={11} 
-                        className="text-gray-600 dark:text-gray-200"
-                        tick={{ fill: 'currentColor' }}
-                        axisLine={{ stroke: 'currentColor' }}
-                      />
-                      <YAxis 
-                        fontSize={11} 
-                        className="text-gray-600 dark:text-gray-200"
-                        tick={{ fill: 'currentColor' }}
-                        axisLine={{ stroke: 'currentColor' }}
-                      />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'var(--tooltip-bg, #fff)',
-                          border: '1px solid var(--tooltip-border, #e5e7eb)',
-                          borderRadius: '0.5rem',
-                          color: 'var(--tooltip-color, #1f2937)',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                        }}
-                        itemStyle={{ color: 'currentColor' }}
-                        labelStyle={{ color: 'currentColor', fontWeight: 'bold' }}
-                      />
-                      <Legend 
-                        wrapperStyle={{ fontSize: '11px' }}
-                        formatter={(value) => (
-                          <span className="text-gray-700 dark:text-gray-200">{value}</span>
-                        )}
-                      />
-                      <Area type="monotone" dataKey="voice" name="Voice" stackId="1" stroke="var(--chart-blue, #3b82f6)" fill="var(--chart-blue, #3b82f6)" fillOpacity={0.6} />
-                      <Area type="monotone" dataKey="chat" name="Chat" stackId="1" stroke="var(--chart-green, #22c55e)" fill="var(--chart-green, #22c55e)" fillOpacity={0.6} />
-                      <Area type="monotone" dataKey="sms" name="SMS" stackId="1" stroke="var(--chart-yellow, #eab308)" fill="var(--chart-yellow, #eab308)" fillOpacity={0.6} />
-                      <Area type="monotone" dataKey="email" name="Email" stackId="1" stroke="var(--chart-red, #ef4444)" fill="var(--chart-red, #ef4444)" fillOpacity={0.6} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800/50 rounded-lg p-3">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Channel Effectiveness</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { channel: 'Voice', csat: 92, resolution: '12m' },
-                    { channel: 'Chat', csat: 88, resolution: '15m' },
-                    { channel: 'SMS', csat: 85, resolution: '18m' },
-                    { channel: 'Email', csat: 82, resolution: '24m' }
-                  ].map((item) => (
-                    <div key={item.channel} className="p-2 bg-gray-50 dark:bg-gray-800/30 rounded-lg">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-100">{item.channel}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">CSAT</span>
-                          <span className="text-xs font-medium text-gray-700 dark:text-gray-200 ml-1">{item.csat}%</span>
-                        </div>
-                        <div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">Resolution</span>
-                          <span className="text-xs font-medium text-gray-700 dark:text-gray-200 ml-1">{item.resolution}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div className="flex flex-col gap-6">
+          <SectionCard title="Churn Risk Analysis" icon={AlertTriangle}>
+            <div className="max-h-[400px] overflow-y-auto">
+              <ChurnRiskTable data={churnRiskData} />
+            </div>
+          </SectionCard>
+          <SectionCard title="Flagged Calls & Issues" icon={AlertTriangle}>
+            <div className="overflow-x-auto">
+              <table className="min-w-[400px] w-full text-xs text-left">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-gray-800">
+                    <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Call ID</th>
+                    <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Agent</th>
+                    <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Issue</th>
+                    <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Date</th>
+                    <th className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {flaggedCalls.map((row, idx) => {
+                    const agent = AGENTS.find(a => a.name === row.agent);
+                    return (
+                      <tr key={row.id} className={`border-b border-gray-100 dark:border-gray-800 transition ${idx % 2 === 1 ? 'bg-gray-50 dark:bg-gray-900/60' : 'bg-white dark:bg-gray-900'} hover:bg-blue-50 dark:hover:bg-blue-900/30`}>
+                        <td className="px-3 py-2 font-mono text-gray-900 dark:text-white">{row.id}</td>
+                        <td className="px-3 py-2 flex items-center gap-2 text-gray-900 dark:text-white">
+                          {agent && <img src={agent.image} alt={agent.name} className="h-6 w-6 rounded-full object-cover" />}
+                          {row.agent}
+                        </td>
+                        <td className="px-3 py-2 text-gray-900 dark:text-white">{row.issue}</td>
+                        <td className="px-3 py-2 text-gray-900 dark:text-white">{row.date}</td>
+                        <td className="px-3 py-2">
+                          <button
+                            className="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
+                            onClick={() => setFlaggedModal({ call: row, agent })}
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </SectionCard>
         </div>
@@ -660,6 +415,64 @@ const Dashboard = () => {
         >
           <selectedKpi.drillDownComponent />
         </Modal>
+      )}
+
+      {/* Flagged Call Details Modal (reuse SupervisorDashboard logic) */}
+      {flaggedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-y-auto max-h-[90vh] border border-gray-200 dark:border-gray-700 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl"
+              onClick={() => setFlaggedModal(null)}
+              aria-label="Close"
+            >×</button>
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Flagged Call Details</h3>
+              <div className="flex items-center gap-3 mb-4">
+                {flaggedModal.agent && <img src={flaggedModal.agent.image} alt={flaggedModal.agent.name} className="h-10 w-10 rounded-full object-cover" />}
+                <div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{flaggedModal.agent?.name}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-300">Call ID: <span className="font-mono text-gray-800 dark:text-gray-200">{flaggedModal.call.id}</span></div>
+                </div>
+              </div>
+              <div className="mb-2">
+                <span className="font-medium text-gray-700 dark:text-gray-200">Issue:</span> <span className="text-gray-900 dark:text-white">{flaggedModal.call.issue}</span>
+              </div>
+              <div className="mb-2">
+                <span className="font-medium text-gray-700 dark:text-gray-200">Date:</span> <span className="text-gray-900 dark:text-white">{flaggedModal.call.date}</span>
+              </div>
+              {flaggedModal.agent?.complianceAlerts?.length ? (
+                <div className="mb-2">
+                  <span className="font-medium text-gray-700 dark:text-gray-200">Compliance Alerts:</span>
+                  <ul className="list-disc ml-5 text-xs text-red-700 dark:text-red-300">
+                    {flaggedModal.agent.complianceAlerts.map((alert, i) => <li key={i}>{alert}</li>)}
+                  </ul>
+                </div>
+              ) : null}
+              {flaggedModal.agent?.transcript?.length ? (
+                <div className="mb-2">
+                  <span className="font-medium text-gray-700 dark:text-gray-200">Transcript Snippet:</span>
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded p-2 mt-1 text-xs text-gray-800 dark:text-gray-100 max-h-32 overflow-y-auto font-mono">
+                    {flaggedModal.agent.transcript.slice(0, 4).map((line, i) => (
+                      <div key={i}>
+                        <span className="text-gray-500 dark:text-gray-400">[{line.time}]</span> <span className="font-bold text-gray-900 dark:text-white">{line.speaker === 'agent' ? 'Agent' : 'Customer'}:</span> <span className="text-gray-800 dark:text-gray-100">{line.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {flaggedModal.agent?.recommendations?.length ? (
+                <div className="mb-2">
+                  <span className="font-medium text-gray-700 dark:text-gray-200">Recommendations:</span>
+                  <ul className="list-disc ml-5 text-xs text-blue-700 dark:text-blue-400">
+                    {flaggedModal.agent.recommendations.map((rec, i) => <li key={i}>{rec}</li>)}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          </div>
+          <div className="fixed inset-0 z-40" onClick={() => setFlaggedModal(null)} />
+        </div>
       )}
 
       <style>{`
@@ -683,6 +496,15 @@ const Dashboard = () => {
           --tooltip-bg: #1f2937;
           --tooltip-color: #ffffff;
           --tooltip-border: #374151;
+        }
+
+        @keyframes wave {
+          0%, 100% { transform: scaleY(1); }
+          50% { transform: scaleY(0.5); }
+        }
+
+        .animate-wave {
+          animation: wave 1s ease-in-out infinite;
         }
       `}</style>
     </div>

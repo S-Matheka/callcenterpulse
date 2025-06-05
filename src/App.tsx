@@ -2,10 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import AgentPerformance from './pages/AgentPerformance';
-import CustomerInsights from './pages/CustomerInsights';
-import CallReview from './pages/CallReview';
-import BusinessOutcomes from './pages/BusinessOutcomes';
 import Login from './pages/Login';
+import SupervisorDashboard from './pages/SupervisorDashboard';
 import { ThemeProvider } from './context/ThemeContext';
 
 // Protected Route wrapper component
@@ -36,10 +34,8 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<Dashboard />} />
+            <Route path="supervisor" element={<SupervisorDashboard />} />
             <Route path="agent-performance" element={<AgentPerformance />} />
-            <Route path="customer-insights" element={<CustomerInsights />} />
-            <Route path="call-review" element={<CallReview />} />
-            <Route path="business-outcomes" element={<BusinessOutcomes />} />
           </Route>
 
           {/* Redirect all unknown routes to login */}

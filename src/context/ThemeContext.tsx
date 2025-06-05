@@ -14,7 +14,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     if (savedTheme) {
       return savedTheme === 'dark';
     }
-    // Default to dark mode instead of checking system preference
+    // Always default to dark mode
     return true;
   });
 

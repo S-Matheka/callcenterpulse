@@ -20,12 +20,12 @@ interface HeaderProps {
 
 const Header = ({ toggleSidebar }: HeaderProps) => {
   const { isDarkMode, toggleTheme } = useTheme();
-  const [dateRange, setDateRange] = useState('This Week');
+  const [dateRange, setDateRange] = useState('Yesterday');
   const [selectedQueue, setSelectedQueue] = useState('All Queues');
   const [selectedChannel, setSelectedChannel] = useState('All Channels');
   const [hasNotifications] = useState(true);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(subDays(new Date(), 1));
   const [isPulseOpen, setIsPulseOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
