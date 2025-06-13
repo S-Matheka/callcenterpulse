@@ -1,6 +1,7 @@
 import { AlertTriangle, Repeat, PhoneOff, FileLock, Smile, TrendingUp } from 'lucide-react';
 import { AGENTS } from '../components/agents/AgentTab';
 import { useState } from 'react';
+import CallDetailsModal from '../components/business-outcomes/CallDetailsModal';
 
 const summaryMetrics = [
   { 
@@ -116,8 +117,87 @@ const churnRiskData = [
   { customer: 'Acme Corp', risk: 'Low', score: 45, lastInteraction: '2024-05-11', factors: 'Positive feedback', action: 'No action needed' },
 ];
 
+const negativeFeedbackCallMocks = [
+  {
+    customerId: 'C-2011',
+    phone: '+1-555-0101',
+    reason: 'Long wait times',
+    summary: 'Customer experienced a long wait before being connected due to high call volume.',
+    duration: '2m 10s',
+    agent: 'Alex Johnson',
+    riskScore: 70,
+    transcript: [
+      { time: '0:00', speaker: 'agent', name: 'Alex Johnson', text: 'Thank you for waiting. Sorry for the delay, how can I help?' },
+      { time: '0:05', speaker: 'customer', name: 'Jane Lee', text: 'I was on hold for over 10 minutes.' },
+      { time: '0:12', speaker: 'agent', name: 'Alex Johnson', text: 'I apologize, we are experiencing high call volume.' },
+      { time: '0:18', speaker: 'customer', name: 'Jane Lee', text: 'Please help me with my issue quickly.' },
+    ]
+  },
+  {
+    customerId: 'C-2012',
+    phone: '+1-555-0102',
+    reason: 'Unclear instructions',
+    summary: 'Customer found the agent instructions confusing during a complex issue resolution.',
+    duration: '1m 45s',
+    agent: 'Sarah Johnson',
+    riskScore: 65,
+    transcript: [
+      { time: '0:00', speaker: 'agent', name: 'Sarah Johnson', text: 'Let me walk you through the steps.' },
+      { time: '0:04', speaker: 'customer', name: 'Chris Evans', text: 'I am not sure I understand what to do next.' },
+      { time: '0:10', speaker: 'agent', name: 'Sarah Johnson', text: 'Sorry, let me clarify each step for you.' },
+      { time: '0:16', speaker: 'customer', name: 'Chris Evans', text: 'Thank you, that helps.' },
+    ]
+  },
+  {
+    customerId: 'C-2013',
+    phone: '+1-555-0103',
+    reason: 'Transfer required',
+    summary: 'Customer was transferred between departments due to routing.',
+    duration: '1m 30s',
+    agent: 'Jamie Smith',
+    riskScore: 60,
+    transcript: [
+      { time: '0:00', speaker: 'agent', name: 'Jamie Smith', text: 'I see you need help with billing, let me transfer you.' },
+      { time: '0:06', speaker: 'customer', name: 'Patricia Kim', text: 'I have already been transferred twice.' },
+      { time: '0:12', speaker: 'agent', name: 'Jamie Smith', text: 'Sorry for the inconvenience, I will connect you to the right department.' },
+      { time: '0:18', speaker: 'customer', name: 'Patricia Kim', text: 'Thank you.' },
+    ]
+  },
+  {
+    customerId: 'C-2014',
+    phone: '+1-555-0104',
+    reason: 'Technical difficulties',
+    summary: 'Customer faced technical issues due to system limitations.',
+    duration: '2m 00s',
+    agent: 'Taylor Wilson',
+    riskScore: 75,
+    transcript: [
+      { time: '0:00', speaker: 'agent', name: 'Taylor Wilson', text: 'I see you are having trouble with the app.' },
+      { time: '0:05', speaker: 'customer', name: 'John Doe', text: 'It keeps crashing when I try to login.' },
+      { time: '0:12', speaker: 'agent', name: 'Taylor Wilson', text: 'We are aware and working on a fix.' },
+      { time: '0:18', speaker: 'customer', name: 'John Doe', text: 'Please let me know when it is resolved.' },
+    ]
+  },
+  {
+    customerId: 'C-2015',
+    phone: '+1-555-0105',
+    reason: 'Inconsistent information',
+    summary: 'Customer received conflicting information due to recent policy updates.',
+    duration: '1m 20s',
+    agent: 'Alex Johnson',
+    riskScore: 68,
+    transcript: [
+      { time: '0:00', speaker: 'agent', name: 'Alex Johnson', text: 'I understand you got different answers before.' },
+      { time: '0:05', speaker: 'customer', name: 'Jane Lee', text: 'Yes, I was told two different things about my account.' },
+      { time: '0:12', speaker: 'agent', name: 'Alex Johnson', text: 'There was a recent policy update, let me clarify.' },
+      { time: '0:18', speaker: 'customer', name: 'Jane Lee', text: 'Thank you for explaining.' },
+    ]
+  },
+];
+
 export default function SupervisorDashboard() {
   const [flaggedModal, setFlaggedModal] = useState<null | { call: typeof flaggedCalls[0], agent: typeof AGENTS[0] | undefined }>(null);
+  const [callModalIdx, setCallModalIdx] = useState<number|null>(null);
 
   return (
     <div className="space-y-10">
@@ -244,7 +324,15 @@ export default function SupervisorDashboard() {
                     <p className="text-xs text-gray-700 dark:text-gray-300">Reason: {item.reason}</p>
                   </div>
                 </div>
-                <span className="text-sm font-medium text-red-700 dark:text-red-300">{item.count} mentions</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-red-700 dark:text-red-300">{item.count} mentions</span>
+                  <button
+                    className="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
+                    onClick={() => setCallModalIdx(idx)}
+                  >
+                    View Call
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -389,6 +477,14 @@ export default function SupervisorDashboard() {
           </table>
         </div>
       </div>
+
+      {callModalIdx !== null && (
+        <CallDetailsModal
+          isOpen={callModalIdx !== null}
+          onClose={() => setCallModalIdx(null)}
+          callData={negativeFeedbackCallMocks[callModalIdx]}
+        />
+      )}
     </div>
   );
 } 

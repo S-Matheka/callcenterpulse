@@ -11,16 +11,16 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-white dark:bg-gray-900">
       <Sidebar isCollapsed={isSidebarOpen} setIsCollapsed={setIsSidebarOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header toggleSidebar={toggleSidebar} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-white dark:bg-gray-900">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-[1920px]">
             <Outlet />
           </div>
         </main>
-        <footer className="w-full py-3 bg-gray-900 border-t border-gray-800 text-center text-xs text-gray-400">
+        <footer className="w-full py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-400">
           Powered by Creo Solutions
         </footer>
       </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Eye, Clock, ThumbsUp, Star } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line } from 'recharts';
 import ComplianceChecklist from '../call-review/ComplianceChecklist';
 import CallSummary from '../call-review/CallSummary';
 import type { ComplianceItem, AgentScorecard as AgentScorecardType } from '../call-review/types';
@@ -220,11 +220,22 @@ const AgentScorecardNoAdherence = ({ scorecard }: { scorecard: Omit<AgentScoreca
   );
 };
 
+const getAgentImprovementData = (agent: typeof AGENTS[0]) => [
+  // Mock 6-week trend data for AHT (in seconds), Quality, Sentiment (0-1)
+  { week: 'W1', aht: 320, quality: Number(agent.quality) - 4, sentiment: agent.sentiment === 'Positive' ? 0.85 : agent.sentiment === 'Negative' ? 0.35 : 0.65 },
+  { week: 'W2', aht: 310, quality: Number(agent.quality) - 2, sentiment: agent.sentiment === 'Positive' ? 0.87 : agent.sentiment === 'Negative' ? 0.38 : 0.68 },
+  { week: 'W3', aht: 305, quality: Number(agent.quality) - 1, sentiment: agent.sentiment === 'Positive' ? 0.89 : agent.sentiment === 'Negative' ? 0.40 : 0.70 },
+  { week: 'W4', aht: 300, quality: Number(agent.quality), sentiment: agent.sentiment === 'Positive' ? 0.90 : agent.sentiment === 'Negative' ? 0.42 : 0.72 },
+  { week: 'W5', aht: 295, quality: Number(agent.quality) + 1, sentiment: agent.sentiment === 'Positive' ? 0.91 : agent.sentiment === 'Negative' ? 0.43 : 0.73 },
+  { week: 'W6', aht: 290, quality: Number(agent.quality) + 2, sentiment: agent.sentiment === 'Positive' ? 0.92 : agent.sentiment === 'Negative' ? 0.44 : 0.74 },
+];
+
 const AgentDetailsModal = ({ agent, onClose }: { agent: typeof AGENTS[0], onClose: () => void }) => {
   const scorecard = getAgentScorecard(agent);
   const compliance = getComplianceChecklist(agent);
   const summary = getCallSummary(agent);
   const coaching = getCoachingNeeds(agent);
+  const improvementData = getAgentImprovementData(agent);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
@@ -239,6 +250,28 @@ const AgentDetailsModal = ({ agent, onClose }: { agent: typeof AGENTS[0], onClos
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <AgentScorecardNoAdherence scorecard={scorecard} />
             <ComplianceChecklist items={compliance} />
+          </div>
+          {/* Agent Improvement Over Time Chart */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mt-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Agent Improvement Over Time</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={improvementData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="text-gray-200 dark:text-gray-700" />
+                  <XAxis dataKey="week" className="text-gray-600 dark:text-gray-200" />
+                  <YAxis yAxisId="left" label={{ value: 'AHT (s)', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 12 }} className="text-blue-500" />
+                  <YAxis yAxisId="right" orientation="right" label={{ value: 'Quality/Sentiment', angle: 90, position: 'insideRight', fill: '#64748b', fontSize: 12 }} className="text-green-500" />
+                  <Tooltip formatter={(value, name) => name === 'sentiment' ? `${(Number(value) * 100).toFixed(0)}%` : value} />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="aht" name="AHT (s)" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line yAxisId="right" type="monotone" dataKey="quality" name="Quality Score" stroke="#f59e42" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line yAxisId="right" type="monotone" dataKey="sentiment" name="Sentiment" stroke="#22c55e" strokeWidth={2} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-2 text-xs text-gray-600 dark:text-gray-300">
+              <span className="font-semibold">AHT</span>: Average Handle Time (lower is better). <span className="font-semibold">Quality</span>: Call Quality Score. <span className="font-semibold">Sentiment</span>: Customer Sentiment (higher is better).
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <CallSummary summary={summary} />
@@ -262,10 +295,17 @@ const AgentDetailsModal = ({ agent, onClose }: { agent: typeof AGENTS[0], onClos
 export default function AgentTab() {
   const [selectedAgent, setSelectedAgent] = useState<typeof AGENTS[0] | null>(null);
 
+  // Explicitly assign Sarah and Alex to top, Jamie and Taylor to low
+  const topPerformers = AGENTS.filter(a => a.name === 'Sarah Johnson' || a.name === 'Alex Johnson');
+  const lowPerformers = AGENTS.filter(a => a.name === 'Jamie Smith' || a.name === 'Taylor Wilson');
+
+  // Sort all agents by quality, high to low
+  const sortedAgents = AGENTS.sort((a, b) => b.quality - a.quality);
+
   return (
     <div className="space-y-10">
       <div>
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Top & Lowest Performing Agents</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Top Performing Agents</h2>
         <table className="min-w-full bg-white dark:bg-gray-900 rounded-xl shadow divide-y divide-gray-200 dark:divide-gray-800 border border-gray-200 dark:border-gray-800">
           <thead>
             <tr>
@@ -282,7 +322,7 @@ export default function AgentTab() {
             </tr>
           </thead>
           <tbody>
-            {[...AGENTS].sort((a, b) => b.quality - a.quality).filter((_, idx, arr) => idx === 0 || idx === arr.length - 1).map((agent, idx) => (
+            {topPerformers.map((agent, idx) => (
               <tr key={agent.id} className={`transition border-b border-gray-200 dark:border-gray-800 ${idx % 2 === 1 ? 'bg-gray-50 dark:bg-gray-900/70' : ''} hover:bg-gray-100 dark:hover:bg-gray-800/60`}>
                 <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-gray-100">
                   <span className="flex items-center gap-2">
@@ -301,9 +341,6 @@ export default function AgentTab() {
                     agent.sentiment === 'Negative' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
                     'bg-gray-100 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300'
                   } flex items-center gap-1`}>
-                    {agent.sentiment === 'Positive' && <svg className="inline h-4 w-4 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zM23 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 2 7.59 8.59C7.22 8.95 7 9.45 7 10v9c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"/></svg>}
-                    {agent.sentiment === 'Negative' && <svg className="inline h-4 w-4 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3h4c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2h-4v2c0 .55-.45 1-1 1s-1-.45-1-1v-2H8c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h6c.55 0 1 .45 1 1s-.45 1-1 1H8v12h8V4c0-.55.45-1 1-1z"/></svg>}
-                    {agent.sentiment === 'Neutral' && <svg className="inline h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><rect x="8" y="11" width="8" height="2" rx="1"/></svg>}
                     <span>{agent.sentiment}</span>
                   </span>
                 </td>
@@ -328,7 +365,7 @@ export default function AgentTab() {
         </table>
       </div>
       <div>
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">All Agents</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Lowest Performing Agents</h2>
         <table className="min-w-full bg-white dark:bg-gray-900 rounded-xl shadow divide-y divide-gray-200 dark:divide-gray-800 border border-gray-200 dark:border-gray-800">
           <thead>
             <tr>
@@ -345,7 +382,7 @@ export default function AgentTab() {
             </tr>
           </thead>
           <tbody>
-            {[...AGENTS].sort((a, b) => b.quality - a.quality).map((agent, idx) => (
+            {lowPerformers.map((agent, idx) => (
               <tr key={agent.id} className={`transition border-b border-gray-200 dark:border-gray-800 ${idx % 2 === 1 ? 'bg-gray-50 dark:bg-gray-900/70' : ''} hover:bg-gray-100 dark:hover:bg-gray-800/60`}>
                 <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-gray-100">
                   <span className="flex items-center gap-2">
@@ -364,9 +401,66 @@ export default function AgentTab() {
                     agent.sentiment === 'Negative' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
                     'bg-gray-100 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300'
                   } flex items-center gap-1`}>
-                    {agent.sentiment === 'Positive' && <svg className="inline h-4 w-4 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zM23 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 2 7.59 8.59C7.22 8.95 7 9.45 7 10v9c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"/></svg>}
-                    {agent.sentiment === 'Negative' && <svg className="inline h-4 w-4 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M15 3h4c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2h-4v2c0 .55-.45 1-1 1s-1-.45-1-1v-2H8c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h6c.55 0 1 .45 1 1s-.45 1-1 1H8v12h8V4c0-.55.45-1 1-1z"/></svg>}
-                    {agent.sentiment === 'Neutral' && <svg className="inline h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><rect x="8" y="11" width="8" height="2" rx="1"/></svg>}
+                    <span>{agent.sentiment}</span>
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    agent.compliance === 'Alert' 
+                      ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' 
+                      : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                  }`}>
+                    {agent.compliance}
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-200">{agent.calls}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <button onClick={() => setSelectedAgent(agent)} className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 text-xs">
+                    <Eye className="h-4 w-4" /> View Details
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">All Agents (Sorted High to Low)</h2>
+        <table className="min-w-full bg-white dark:bg-gray-900 rounded-xl shadow divide-y divide-gray-200 dark:divide-gray-800 border border-gray-200 dark:border-gray-800">
+          <thead>
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Agent</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">AHT</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                Call Quality Score
+                <span className="block text-[10px] font-normal text-gray-400 dark:text-gray-500 normal-case">(out of 100)</span>
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Sentiment</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Compliance</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Calls</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedAgents.map((agent, idx) => (
+              <tr key={agent.id} className={`transition border-b border-gray-200 dark:border-gray-800 ${idx % 2 === 1 ? 'bg-gray-50 dark:bg-gray-900/70' : ''} hover:bg-gray-100 dark:hover:bg-gray-800/60`}>
+                <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-gray-100">
+                  <span className="flex items-center gap-2">
+                    <img src={agent.image} alt={agent.name} className="h-7 w-7 rounded-full object-cover" />
+                    {agent.name}
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-200">{agent.aht}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-200 flex items-center gap-1">
+                  <span>{agent.quality}</span>
+                  <span className="ml-1"><svg xmlns="http://www.w3.org/2000/svg" className="inline h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    agent.sentiment === 'Positive' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                    agent.sentiment === 'Negative' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                    'bg-gray-100 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300'
+                  } flex items-center gap-1`}>
                     <span>{agent.sentiment}</span>
                   </span>
                 </td>

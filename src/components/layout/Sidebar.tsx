@@ -51,7 +51,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
   };
 
   // Get user email and extract first name
-  const userEmail = localStorage.getItem('userEmail') || '';
+  const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || '';
   const firstName = userEmail.split('@')[0].split('.')[0];
   const capitalizedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Sun, Moon } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const Login = () => {
@@ -9,23 +9,25 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode } = useTheme();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Set authentication state
-    localStorage.setItem('isAuthenticated', 'true');
-    // Store user email
-    localStorage.setItem('userEmail', email);
     if (rememberMe) {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userEmail', email);
       localStorage.setItem('rememberedEmail', email);
     } else {
+      sessionStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem('userEmail', email);
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userEmail');
       localStorage.removeItem('rememberedEmail');
     }
     navigate('/');
   };
 
-  // Check for remembered email on component mount
+  // On mount, check for remembered email
   useState(() => {
     const rememberedEmail = localStorage.getItem('rememberedEmail');
     if (rememberedEmail) {
@@ -34,27 +36,29 @@ const Login = () => {
     }
   });
 
+  // On window unload, clear sessionStorage auth
+  useEffect(() => {
+    const handleUnload = () => {
+      if (!localStorage.getItem('isAuthenticated')) {
+        sessionStorage.removeItem('isAuthenticated');
+        sessionStorage.removeItem('userEmail');
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
+
   return (
     <div className="min-h-screen flex bg-white dark:bg-gray-900">
       {/* Left Section */}
       <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-md w-full mx-auto">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col items-center mb-6">
             <img
               src={isDarkMode ? "/logos/dark/logo.svg" : "/logos/light/logo.svg"}
               alt="Company Logo"
-              className="h-12 w-auto"
+              className="h-12 w-auto mb-2"
             />
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              {isDarkMode ? (
-                <Sun className="h-5 w-5 text-gray-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-gray-600" />
-              )}
-            </button>
           </div>
           
           <div className="text-center">

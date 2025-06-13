@@ -142,21 +142,21 @@ export const TotalCallsDrillDown = () => {
         {/* Top Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
-            title="Total Calls"
+            title="Total Interactions"
             value={totalCalls.callTypes.inbound + totalCalls.callTypes.outbound}
             icon={Phone}
             trend={5.2}
             className="bg-gradient-to-br from-blue-500 to-blue-600"
           />
           <MetricCard
-            title="Inbound Calls"
+            title="Inbound Interactions"
             value={totalCalls.callTypes.inbound}
             icon={PhoneCall}
             trend={3.8}
             className="bg-gradient-to-br from-green-500 to-green-600"
           />
           <MetricCard
-            title="Outbound Calls"
+            title="Outbound Interactions"
             value={totalCalls.callTypes.outbound}
             icon={PhoneOutgoing}
             trend={-2.1}
@@ -171,7 +171,7 @@ export const TotalCallsDrillDown = () => {
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-800">
                   <th className="px-3 py-2 font-medium">Department</th>
-                  <th className="px-3 py-2 font-medium">Total Calls</th>
+                  <th className="px-3 py-2 font-medium">Total Interactions</th>
                 </tr>
               </thead>
               <tbody>
@@ -193,7 +193,7 @@ export const TotalCallsDrillDown = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartContainer title="Call Distribution by Channel">
+          <ChartContainer title="Interaction Distribution by Channel">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -221,7 +221,7 @@ export const TotalCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Call Volume by Time of Day">
+          <ChartContainer title="Interaction Volume by Time of Day">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={totalCalls.byTimeOfDay}>
@@ -246,7 +246,7 @@ export const TotalCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Daily Call Volume Trend">
+          <ChartContainer title="Daily Interaction Volume Trend">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={totalCalls.trends.daily}>
@@ -277,7 +277,7 @@ export const TotalCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Weekly Call Volume Trend">
+          <ChartContainer title="Weekly Interaction Volume Trend">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={totalCalls.trends.weekly}>
@@ -298,11 +298,11 @@ export const TotalCallsDrillDown = () => {
                   <Tooltip content={<CustomTooltip />} />
                   <Line
                     type="monotone"
-                    dataKey="value"
+                    dataKey="value" 
                     stroke={COLORS.primary}
                     strokeWidth={2}
                     dot={{ fill: COLORS.primary, stroke: COLORS.primary, r: 4 }}
-                  />
+                      />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -322,7 +322,7 @@ export const TotalAnsweredDrillDown = () => {
         {/* Top Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
-            title="Total Answered"
+            title="Interactions Answered"
             value={totalAnswered.total}
             icon={PhoneCall}
             trend={3.8}
@@ -365,7 +365,7 @@ export const TotalAnsweredDrillDown = () => {
                     </td>
                     <td className="px-3 py-2">{row.value}</td>
                   </tr>
-                ))}
+            ))}
               </tbody>
             </table>
           </div>
@@ -373,7 +373,7 @@ export const TotalAnsweredDrillDown = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartContainer title="Answered Calls by Channel">
+          <ChartContainer title="Answered Interactions by Channel">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -401,7 +401,7 @@ export const TotalAnsweredDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Answered Calls by Time of Day">
+          <ChartContainer title="Answered Interactions by Time of Day">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={totalAnswered.byTimeOfDay}>
@@ -426,7 +426,7 @@ export const TotalAnsweredDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Daily Answered Calls Trend">
+          <ChartContainer title="Daily Answered Interactions Trend">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={totalAnswered.trends.daily}>
@@ -464,14 +464,14 @@ export const TotalAnsweredDrillDown = () => {
 
 export const AbandonedCallsDrillDown = () => {
   const { abandoned } = drillDownData;
-
+  
   return (
     <div className="space-y-6">
       <div className="space-y-6 p-4">
         {/* Top Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
-            title="Total Abandoned"
+            title="Interactions Abandoned"
             value={abandoned.total}
             icon={Phone}
             trend={-2.4}
@@ -522,7 +522,7 @@ export const AbandonedCallsDrillDown = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartContainer title="Abandoned Calls by Wait Time">
+          <ChartContainer title="Abandoned Interactions by Wait Time">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -550,7 +550,7 @@ export const AbandonedCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Abandoned Calls by Stage">
+          <ChartContainer title="Abandoned Interactions by Stage">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -578,7 +578,7 @@ export const AbandonedCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Abandoned Calls by Time of Day">
+          <ChartContainer title="Abandoned Interactions by Time of Day">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={abandoned.byTimeOfDay}>
@@ -603,7 +603,7 @@ export const AbandonedCallsDrillDown = () => {
             </div>
           </ChartContainer>
 
-          <ChartContainer title="Daily Abandoned Calls Trend">
+          <ChartContainer title="Daily Abandoned Interactions Trend">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={abandoned.trends.daily}>
@@ -633,7 +633,7 @@ export const AbandonedCallsDrillDown = () => {
               </ResponsiveContainer>
             </div>
           </ChartContainer>
-        </div>
+                </div>
       </div>
     </div>
   );
@@ -691,7 +691,7 @@ export const WaitTimeDrillDown = () => {
                     </td>
                     <td className="px-3 py-2">{row.value}</td>
                   </tr>
-                ))}
+            ))}
               </tbody>
             </table>
           </div>
@@ -773,11 +773,11 @@ export const WaitTimeDrillDown = () => {
                   <Tooltip content={<CustomTooltip />} />
                   <Line
                     type="monotone"
-                    dataKey="value"
+                    dataKey="value" 
                     stroke={COLORS.primary}
                     strokeWidth={2}
                     dot={{ fill: COLORS.primary, stroke: COLORS.primary, r: 4 }}
-                  />
+                      />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -839,20 +839,20 @@ export const SentimentDrillDown = () => {
                   }}
                 />
               </PieChart>
-            </ResponsiveContainer>
-          </div>
+          </ResponsiveContainer>
+        </div>
           <div className="mt-4 text-xs text-gray-700 dark:text-gray-300 space-y-1">
             <div>Based on <span className="font-semibold">{totalInteractions.toLocaleString()}</span> interactions yesterday</div>
             <div>
               <span className="text-green-600 dark:text-green-400 font-semibold">Positive</span> mood {positiveDelta >= 0 ? 'up' : 'down'} {Math.abs(positiveDelta)}% vs last period. <span className="text-red-600 dark:text-red-400 font-semibold">Frustrated</span> {frustratedDelta >= 0 ? 'up' : 'down'} {Math.abs(frustratedDelta)}%.
-            </div>
+        </div>
             <div>
               {customerMoodData.overall.frustrated > 20 ? (
                 <span className="text-red-600 dark:text-red-400 font-semibold">Frustration is above threshold. Review escalation protocols.</span>
               ) : (
                 <span className="text-green-600 dark:text-green-400 font-semibold">Customer mood is stable. Keep monitoring sentiment drivers.</span>
               )}
-            </div>
+      </div>
           </div>
         </ChartContainer>
 
@@ -892,21 +892,21 @@ export const SentimentDrillDown = () => {
                 />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+                </div>
           <div className="mt-4 text-xs text-gray-700 dark:text-gray-300 space-y-1">
             <div>Based on <span className="font-semibold">{totalInteractions.toLocaleString()}</span> interactions yesterday</div>
             <div>
               <span className="text-blue-600 dark:text-blue-400 font-semibold">Call</span> channel has the highest positive mood (60%).
               <span className="ml-2 text-red-600 dark:text-red-400 font-semibold">SMS</span> has the highest frustration (15%).
-            </div>
+              </div>
             <div>
               {mostFrustratedChannel.value > 10 ? (
                 <span className="text-red-600 dark:text-red-400 font-semibold">Review SMS scripts and escalation handling for improvement.</span>
               ) : (
                 <span className="text-green-600 dark:text-green-400 font-semibold">No channel-specific mood risks detected.</span>
               )}
-            </div>
           </div>
+        </div>
         </ChartContainer>
       </div>
 
@@ -935,11 +935,11 @@ export const SentimentDrillDown = () => {
                     <td className="px-3 py-2 text-gray-900 dark:text-white">{row.sms}</td>
                     <td className="px-3 py-2 text-gray-900 dark:text-white">{row.call}</td>
                   </tr>
-                ))}
+      ))}
               </tbody>
             </table>
-          </div>
-        </div>
+    </div>
+      </div>
 
         {/* Sample Phrases */}
         <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 h-full flex flex-col">
@@ -963,12 +963,12 @@ export const SentimentDrillDown = () => {
                 <div>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">{item.phrase}</span>
                   <span className="block text-xs text-gray-500 dark:text-gray-300 mt-1">Channels: {item.channels.join(', ')}</span>
-                </div>
+            </div>
                 <span className="text-sm font-medium text-green-700 dark:text-green-300">{item.count} mentions</span>
               </li>
-            ))}
+        ))}
           </ul>
-        </div>
+      </div>
       </div>
     </div>
   );
@@ -1031,7 +1031,7 @@ export const ChannelPerformanceDrillDown = () => {
                 ))}
               </Pie>
               <Tooltip 
-                formatter={(value: number) => [`${value} calls`, 'Volume']}
+                formatter={(value: number) => [`${value} interactions`, 'Volume']}
                 contentStyle={{ 
                   backgroundColor: 'var(--tooltip-bg, #fff)',
                   border: '1px solid var(--tooltip-border, #e5e7eb)',
@@ -1133,7 +1133,7 @@ export const BusinessOutcomesDrillDown = () => {
         <h3 className="text-sm font-medium mb-4">Conversion Funnel</h3>
         <div className="space-y-3">
           {[
-            { stage: 'Calls', value: 1248, percent: '100%' },
+            { stage: 'Interactions', value: 1248, percent: '100%' },
             { stage: 'Qualified', value: 892, percent: '71%' },
             { stage: 'Opportunity', value: 524, percent: '42%' },
             { stage: 'Converted', value: 248, percent: '20%' },
@@ -1179,7 +1179,7 @@ export const BusinessOutcomesDrillDown = () => {
       </div>
     </div>
   );
-};
+}; 
 
 // Mock data for top issues by channel
 const topIssuesByChannel = [

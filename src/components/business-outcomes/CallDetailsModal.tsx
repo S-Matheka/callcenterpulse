@@ -12,6 +12,7 @@ interface CallDetailsModalProps {
     duration: string;
     agent: string;
     riskScore?: number;
+    transcript?: any[];
   };
 }
 
@@ -114,8 +115,8 @@ const formatTime = (s: number) => {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 };
 
-const CallDetailsModal = ({ isOpen, onClose, callData }: CallDetailsModalProps & { callData: { riskScore?: number } }) => {
-  const transcript = getTranscript(callData);
+const CallDetailsModal = ({ isOpen, onClose, callData }: CallDetailsModalProps & { callData: { riskScore?: number, transcript?: any[] } }) => {
+  const transcript = callData.transcript ? callData.transcript : getTranscript(callData);
   const duration = Math.min(parseDuration(callData.duration), 90);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);

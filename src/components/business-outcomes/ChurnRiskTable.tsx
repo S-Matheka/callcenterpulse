@@ -79,7 +79,7 @@ const ChurnRiskTable = ({ data }: ChurnRiskTableProps) => {
               <tr key={item.callId} className="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition">
                 <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white flex items-center gap-2">
                   {item.riskScore >= 80 && <AlertTriangle className="h-4 w-4 text-red-500" />}
-                  {item.company}
+                        {item.company}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.issueType}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
@@ -105,10 +105,10 @@ const ChurnRiskTable = ({ data }: ChurnRiskTableProps) => {
       {/* Modal rendered as portal at document.body */}
       {selectedCall.isOpen && selectedCall.data &&
         createPortal(
-          <CallDetailsModal
+        <CallDetailsModal
             isOpen={true}
-            onClose={() => setSelectedCall({ isOpen: false, data: null })}
-            callData={selectedCall.data}
+          onClose={() => setSelectedCall({ isOpen: false, data: null })}
+          callData={selectedCall.data}
           />,
           document.body
         )

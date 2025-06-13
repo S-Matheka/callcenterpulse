@@ -8,8 +8,10 @@ import { ThemeProvider } from './context/ThemeContext';
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // Check if user is logged in
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  // Check if user is logged in (localStorage for rememberMe, sessionStorage for session-only)
+  const isAuthenticated =
+    localStorage.getItem('isAuthenticated') === 'true' ||
+    sessionStorage.getItem('isAuthenticated') === 'true';
   
   if (!isAuthenticated) {
     // Redirect to login if not authenticated

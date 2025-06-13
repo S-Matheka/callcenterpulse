@@ -118,8 +118,8 @@ const Dashboard = () => {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [flaggedModal, setFlaggedModal] = useState<null | { call: typeof flaggedCalls[0], agent: typeof AGENTS[0] | undefined }>(null);
 
-  // Get user's first name from localStorage
-  const userEmail = localStorage.getItem('userEmail') || '';
+  // Get user's first name from localStorage or sessionStorage
+  const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || '';
   const firstName = userEmail.split('@')[0].split('.')[0];
   const capitalizedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
@@ -147,30 +147,30 @@ const Dashboard = () => {
 
   const kpiData = [
     {
-      title: 'Total Calls',
+      title: 'Total Interactions',
       value: formatNumber(dailyData.totalCalls),
       change: 5.2,
       icon: Phone,
       iconColor: 'bg-blue-500',
-      drillDownTitle: 'Total Calls Analysis',
+      drillDownTitle: 'Total Interactions Analysis',
       drillDownComponent: TotalCallsDrillDown
     },
     {
-      title: 'Total Answered',
+      title: 'Interactions Answered',
       value: formatNumber(dailyData.totalAnswered),
       change: 3.8,
       icon: PhoneCall,
       iconColor: 'bg-green-500',
-      drillDownTitle: 'Answered Calls Analysis',
+      drillDownTitle: 'Answered Interactions Analysis',
       drillDownComponent: TotalAnsweredDrillDown
     },
     {
-      title: 'Total Abandoned',
+      title: 'Interactions Abandoned',
       value: formatNumber(dailyData.totalAbandoned),
       change: -12.4,
       icon: AbandonedCallIcon,
       iconColor: 'bg-red-500',
-      drillDownTitle: 'Abandoned Calls Analysis',
+      drillDownTitle: 'Abandoned Interactions Analysis',
       drillDownComponent: AbandonedCallsDrillDown
     },
     {
@@ -212,13 +212,13 @@ const Dashboard = () => {
       </div>
 
       {/* AI & vCons Insights - Full Width */}
-      <div>
-        <SectionCard title="AI & vCons Insights" icon={Brain}>
-          <div>
+        <div>
+          <SectionCard title="AI & vCons Insights" icon={Brain}>
+                  <div>
             <SentimentDrillDown />
-          </div>
-        </SectionCard>
-      </div>
+            </div>
+          </SectionCard>
+        </div>
 
       {/* Other Cards in 2 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -343,9 +343,9 @@ const Dashboard = () => {
                     <Area type="monotone" dataKey="email" stackId="1" stroke="#ef4444" fill="#ef4444" name="Email" />
                   </AreaChart>
                 </ResponsiveContainer>
+                </div>
               </div>
-            </div>
-            <div>
+                        <div>
               <h3 className="text-base font-semibold mb-2 text-gray-900 dark:text-white">Channel Effectiveness</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {omnichannelTrendsData.effectiveness.map((channel) => (
@@ -353,8 +353,8 @@ const Dashboard = () => {
                     <span className="font-semibold text-gray-900 dark:text-white mb-1">{channel.channel}</span>
                     <span className="text-sm text-gray-500 dark:text-gray-300">CSAT <span className="font-bold text-gray-900 dark:text-white">{channel.csat}%</span></span>
                     <span className="text-sm text-gray-500 dark:text-gray-300">Resolution <span className="font-bold text-gray-900 dark:text-white">{channel.resolution}</span></span>
-                  </div>
-                ))}
+                    </div>
+                  ))}
               </div>
             </div>
           </SectionCard>
@@ -363,7 +363,7 @@ const Dashboard = () => {
           <SectionCard title="Churn Risk Analysis" icon={AlertTriangle}>
             <div className="max-h-[400px] overflow-y-auto">
               <ChurnRiskTable data={churnRiskData} />
-            </div>
+                </div>
           </SectionCard>
           <SectionCard title="Flagged Calls & Issues" icon={AlertTriangle}>
             <div className="overflow-x-auto">
